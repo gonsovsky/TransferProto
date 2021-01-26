@@ -2,13 +2,11 @@
 
 namespace Atoll.TransferService.Bundle.Server.Contract.Get
 {
-
     /// <summary>
     /// Контракт обработчика запроса получения данных.
     /// </summary>
     public interface IHotGetHandler : IDisposable
     {
-
         /// <summary>
         /// Выполнить инициализацию обработчика запроса.
         /// </summary>
@@ -23,6 +21,6 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         /// <returns>контекст запроса.</returns>
         IHotGetHandlerContext Read(IHotGetHandlerContext ctx);
 
+        bool ReadEnd(IHotGetHandlerContext ctx);
     }
-
 }

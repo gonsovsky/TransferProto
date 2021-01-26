@@ -1,60 +1,41 @@
-﻿using Corallite.Buffers;
+﻿using Atoll.TransferService.Bundle.Proto;
+using Corallite.Buffers;
 
 namespace Atoll.TransferService.Bundle.Server.Contract.Get
 {
     /// <summary>
     /// Описатель запроса получения данных.
-    /// </summary>
-    public sealed class HotGetHandlerRequest: HotGetHandlerSomeone
+    /// </summary> 
+    public sealed class HotGetHandlerRequest: State
     {
         /// <summary>
         /// Маршрут запроса.
         /// </summary>
-        public readonly string Route;
+        public string Route;
 
         /// <summary>
-        /// Данные запроса.
+        /// Длина данных запроса (заголовка) в массиве <see cref="Head"/>.
         /// </summary>
-        public readonly byte[] Data;
+        public int HeadLength;
 
         /// <summary>
-        /// Длина данных запроса в массиве <see cref="Data"/>.
+        /// Данные запроса  (заголовка).
         /// </summary>
-        public readonly int DataLength;
+        public byte[] Head;
 
-        /// <summary>
-        /// Количество заполненных байт по результатам итерации чтения.
-        /// </summary>
-        public int BytesRead;
-
-        /// <summary>
-        /// Конструктор.
-        /// </summary>
-        /// <param name="route">маршрут запроса.</param>
-        /// <param name="data">данные запроса.</param>
-        /// <param name="dataLength">длина данных запроса в массиве <paramref name="data"/>.</param>
-        public HotGetHandlerRequest(string route, byte[] data, int dataLength) 
+        public override bool DataArrived(int cnt)
         {
-            this.Route = route;
-            this.Data = data;
-            this.DataLength = dataLength;
+            if (BytesProcessed <= Packet.MinSize)
+                return false;
+            var packet = Packet.FromByteArray(Buffer);
+            this.Route = packet.Route;
+            this.HeadLength = packet.HeadLen;
+            this.Head = packet.HeadData;
+            return true;
         }
 
-        public HotGetHandlerRequest(int dataLength)
+        public HotGetHandlerRequest(int bufferSize) : base(bufferSize)
         {
-            this.Data = UniArrayPool<byte>.Shared.Rent(dataLength);
-            this.DataLength = dataLength;
-        }
-
-        public bool DataArrived(int cnt)
-        {
-            BytesRead += cnt;
-            return false;
-        }
-
-        public void DataRelease()
-        {
-            UniArrayPool<byte>.Shared.Return(this.Data);
         }
     }
 }

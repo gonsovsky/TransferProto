@@ -1,12 +1,10 @@
 ﻿namespace Atoll.TransferService.Bundle.Server.Contract.Get
 {
-
     /// <summary>
     /// Контекст запроса получения данных.
     /// </summary>
     public interface IHotGetHandlerContext 
     {
-
         /// <summary>
         /// Получить описатель запроса.
         /// </summary>

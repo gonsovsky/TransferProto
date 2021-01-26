@@ -2,25 +2,22 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using Atoll.TransferService.Bundle.Proto;
 using Atoll.TransferService.Bundle.Server.Contract;
 using Atoll.TransferService.Bundle.Server.Contract.Get;
 
 namespace Atoll.TransferService.Bundle.Server.Implementation
 {
-
     /// <summary>
     /// Реализация сервера приема и передачи данных.
     /// </summary>
-    public sealed class HotServer : IDisposable
+    public sealed class HotServer : Party
     {
         private HotServerConfiguration config;
 
         private HotServerRouteCollection routes;
 
         private Socket listener;
-
-        private readonly ManualResetEvent allDone =
-            new ManualResetEvent(false);
 
         public void Start()
         {
@@ -31,11 +28,11 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             listener.Listen(100);
             while (true)
             {
-                allDone.Reset();
+                AllDone.Reset();
                 listener.BeginAccept(
                     AcceptCallback,
                     listener);
-                allDone.WaitOne();
+                AllDone.WaitOne();
             }
         }
 
@@ -47,11 +44,11 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
 
         private void AcceptCallback(IAsyncResult ar)
         {
-            allDone.Set();
+            AllDone.Set();
             var client = (Socket)ar.AsyncState;
             var handler = client.EndAccept(ar);
             var ctx = new HotGetHandlerContext(listener, config);
-            handler.BeginReceive(ctx.Request.Data, 0, ctx.Request.DataLength, 0,
+            handler.BeginReceive(ctx.Request.Buffer, 0, ctx.Request.BufferSize, 0,
                 ReadCallback, ctx);
         }
 
@@ -67,9 +64,9 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
                 {
                     if (ctx.Handler == null)
                     {
-                        if (routes.GetRoutes.TryGetValue(ctx.Request.Route, out IHotGetHandlerFactory factory))
+                        if (routes.GetRoutes.TryGetValue(ctx.Request.Route, out var factory))
                         {
-                            ctx.Frame = new HotGetHandlerFrame(config);
+                            ctx.Frame = new HotGetHandlerFrame(config.BufferSize);
                             ctx.Handler = factory.Create(ctx);
                             ctx.Handler.Open(ctx);
                         }
@@ -79,17 +76,18 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
                         }
                     }
                     ctx.Handler.Read(ctx);
-                    ctx.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BytesRead, 0,
+                    ctx.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BytesProcessed, 0,
                         SendCallback, ctx);
                 }
                 finally
                 {
-                    ctx.Request.DataRelease();
+                    ctx.Request.Dispose();
                 }
             }
             else
             {
-                ctx.Socket.BeginReceive(ctx.Request.Data, ctx.Request.BytesRead, ctx.Request.DataLength, 0,
+                ctx.Socket.BeginReceive(ctx.Request.Buffer, ctx.Request.BytesProcessed, 
+                    ctx.Request.BufferSize - ctx.Request.BytesProcessed, 0,
                     ReadCallback, ctx);
             }
         }
@@ -98,9 +96,16 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
         {
             var ctx = (HotGetHandlerContext) ar.AsyncState;
             ctx.Socket.EndSend(ar);
-            ctx.Handler.Read(ctx);
-            ctx.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BytesRead, 0,
-                SendCallback, ctx);
+            if (ctx.Handler.ReadEnd(ctx))
+            {
+                ctx.Ok();
+            }
+            else
+            {
+                ctx.Handler.Read(ctx);
+                ctx.Socket.BeginSend(ctx.Frame.Buffer, ctx.Frame.BytesProcessed, ctx.Frame.BufferSize, 0,
+                    SendCallback, ctx);
+            }
         }
 
 
