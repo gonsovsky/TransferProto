@@ -1,4 +1,4 @@
-﻿namespace Atoll.TransferService
+﻿namespace Atoll.TransferService.Bundle.Server.Contract.Put
 {
 
     /// <summary>

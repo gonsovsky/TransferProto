@@ -1,12 +1,10 @@
-﻿namespace Atoll.TransferService
+﻿namespace Atoll.TransferService.Bundle.Server.Contract.Get
 {
-
     /// <summary>
     /// Описатель кадра ответа на запрос получения данных.
     /// </summary>
-    public sealed class HotGetHandlerFrame 
+    public sealed class HotGetHandlerFrame: HotGetHandlerSomeone
     {
-
         /// <summary>
         /// Буфер для заполнения.
         /// </summary>
@@ -31,6 +29,11 @@
         /// Количество заполненных байт по результатам итерации чтения.
         /// </summary>
         public int BytesRead;
+
+        public HotGetHandlerFrame(HotServerConfiguration config)
+        {
+            Buffer = Corallite.Buffers.UniArrayPool<byte>.Shared.Rent(config.BufferSize);
+        }
 
     }
 

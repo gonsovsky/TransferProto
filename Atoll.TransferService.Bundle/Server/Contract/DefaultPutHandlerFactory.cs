@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using Atoll.TransferService.Bundle.Server.Contract.Put;
 
-namespace Atoll.TransferService
+namespace Atoll.TransferService.Bundle.Server.Contract
 {
 
     /// <summary>

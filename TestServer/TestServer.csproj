@@ -41,6 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MyHotGetFileHandler.cs" />
+    <Compile Include="MyHotListFilesHandler.cs" />
+    <Compile Include="MyHotPutFileHandler.cs" />
+    <Compile Include="NonClosableStreamWrap.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

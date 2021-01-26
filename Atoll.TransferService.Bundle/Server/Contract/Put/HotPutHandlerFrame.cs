@@ -1,12 +1,10 @@
-﻿namespace Atoll.TransferService
+﻿namespace Atoll.TransferService.Bundle.Server.Contract.Put
 {
-
     /// <summary>
     /// Описатель ответа на запрос отправки данных.
     /// </summary>
     public sealed class HotPutHandlerFrame 
     {
-
         /// <summary>
         /// Буфер, содержащий данные для приема.
         /// </summary>
@@ -26,7 +24,5 @@
         /// Количество принятых данных.
         /// </summary>
         public int Count;
-
     }
-
 }

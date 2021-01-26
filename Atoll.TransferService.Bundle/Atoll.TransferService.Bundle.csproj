@@ -4,4 +4,10 @@
     <TargetFrameworks>net40;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Reference Include="Corallite">
+      <HintPath>..\Lib\netstandard2.0\Corallite.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

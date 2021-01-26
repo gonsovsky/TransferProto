@@ -1,12 +1,10 @@
-﻿namespace Atoll.TransferService
+﻿namespace Atoll.TransferService.Bundle.Server.Contract.Put
 {
-
     /// <summary>
     /// Описатель запроса отправки данных.
     /// </summary>
     public sealed class HotPutHandlerRequest 
     {
-
         /// <summary>
         /// Маршрут запроса.
         /// </summary>
@@ -34,7 +32,5 @@
             this.Data = data;
             this.DataLength = dataLength;
         }
-
     }
-
 }
