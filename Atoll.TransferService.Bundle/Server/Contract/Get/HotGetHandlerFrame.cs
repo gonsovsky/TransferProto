@@ -11,9 +11,9 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         {
         }
 
-        public override bool DataArrived(int len)
+        public override bool DataTransmitted(int len)
         {
-            return base.DataArrived(len);
+            return base.DataTransmitted(len);
         }
     }
 }

@@ -8,3 +8,4 @@ C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\net40\Atoll.
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\net40\Atoll.TransferService.Bundle.dll
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\net40\Atoll.TransferService.Bundle.pdb
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\net40\Atoll.TransferService.Bundle.csprojAssemblyReference.cache
+C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\bin\Debug\net40\Newtonsoft.Json.dll

@@ -53,6 +53,10 @@
       <Project>{3A14B887-B0C4-43B7-9DF6-101B765D1C9B}</Project>
       <Name>Atoll.TransferService.Bundle</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TestContract\TestContract.csproj">
+      <Project>{A37D5950-4148-4EFD-8A6B-283F28DB263B}</Project>
+      <Name>TestContract</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

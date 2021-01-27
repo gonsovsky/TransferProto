@@ -1,0 +1,10 @@
+C:\SoftConsult\TransferProto\TestContract\bin\Debug\net40\TestContract.dll
+C:\SoftConsult\TransferProto\TestContract\bin\Debug\net40\TestContract.pdb
+C:\SoftConsult\TransferProto\TestContract\bin\Debug\net40\Corallite.dll
+C:\SoftConsult\TransferProto\TestContract\obj\Debug\net40\TestContract.csprojAssemblyReference.cache
+C:\SoftConsult\TransferProto\TestContract\obj\Debug\net40\TestContract.csproj.CoreCompileInputs.cache
+C:\SoftConsult\TransferProto\TestContract\obj\Debug\net40\TestContract.AssemblyInfoInputs.cache
+C:\SoftConsult\TransferProto\TestContract\obj\Debug\net40\TestContract.AssemblyInfo.cs
+C:\SoftConsult\TransferProto\TestContract\obj\Debug\net40\TestContract.csproj.CopyComplete
+C:\SoftConsult\TransferProto\TestContract\obj\Debug\net40\TestContract.dll
+C:\SoftConsult\TransferProto\TestContract\obj\Debug\net40\TestContract.pdb

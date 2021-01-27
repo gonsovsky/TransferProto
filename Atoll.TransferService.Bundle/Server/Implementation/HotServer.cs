@@ -21,18 +21,25 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
 
         public void Start()
         {
-            var localEndPoint = new IPEndPoint(IPAddress.Any, config.Port);
-            listener = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-            listener.Bind(localEndPoint);
-            listener.Listen(100);
-            while (true)
+            try
             {
-                AllDone.Reset();
-                listener.BeginAccept(
-                    AcceptCallback,
-                    listener);
-                AllDone.WaitOne();
+                var localEndPoint = new IPEndPoint(IPAddress.Any, config.Port);
+                listener = new Socket(AddressFamily.InterNetwork,
+                    SocketType.Stream, ProtocolType.Tcp);
+                listener.Bind(localEndPoint);
+                listener.Listen(100);
+                while (true)
+                {
+                    AllDone.Reset();
+                    listener.BeginAccept(
+                        AcceptCallback,
+                        listener);
+                    AllDone.WaitOne();
+                }
+            }
+            catch (Exception e)
+            {
+                Abort(null, e);
             }
         }
 
@@ -58,7 +65,7 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             var bytesRead = ctx.Socket.EndReceive(ar);
             if (bytesRead <= 0)
                 return;
-            if (ctx.Request.DataArrived(bytesRead))
+            if (ctx.Request.DataTransmitted(bytesRead))
             {
                 try
                 {
@@ -76,7 +83,7 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
                         }
                     }
                     ctx.Handler.Read(ctx);
-                    ctx.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BytesProcessed, 0,
+                    ctx.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BytesTransmitted, 0,
                         SendCallback, ctx);
                 }
                 finally
@@ -86,8 +93,8 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             }
             else
             {
-                ctx.Socket.BeginReceive(ctx.Request.Buffer, ctx.Request.BytesProcessed, 
-                    ctx.Request.BufferSize - ctx.Request.BytesProcessed, 0,
+                ctx.Socket.BeginReceive(ctx.Request.Buffer, ctx.Request.BytesTransmitted, 
+                    ctx.Request.BufferSize - ctx.Request.BytesTransmitted, 0,
                     ReadCallback, ctx);
             }
         }
@@ -103,7 +110,7 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             else
             {
                 ctx.Handler.Read(ctx);
-                ctx.Socket.BeginSend(ctx.Frame.Buffer, ctx.Frame.BytesProcessed, ctx.Frame.BufferSize, 0,
+                ctx.Socket.BeginSend(ctx.Frame.Buffer, ctx.Frame.BytesTransmitted, ctx.Frame.BufferSize, 0,
                     SendCallback, ctx);
             }
         }

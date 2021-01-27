@@ -1,4 +1,6 @@
-﻿using Atoll.TransferService.Bundle.Proto;
+﻿using System.Runtime.InteropServices;
+using System.Text;
+using Atoll.TransferService.Bundle.Proto;
 using Corallite.Buffers;
 
 namespace Atoll.TransferService.Bundle.Server.Contract.Get
@@ -23,9 +25,16 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         /// </summary>
         public byte[] Head;
 
-        public override bool DataArrived(int cnt)
+        public T GetContract<T>()
         {
-            if (BytesProcessed <= Packet.MinSize)
+            var str = Encoding.UTF8.GetString(Head);
+            var x = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(str);
+            return x;
+        }
+
+        public override bool DataTransmitted(int cnt)
+        {
+            if (BytesTransmitted <= Packet.MinSize)
                 return false;
             var packet = Packet.FromByteArray(Buffer);
             this.Route = packet.Route;

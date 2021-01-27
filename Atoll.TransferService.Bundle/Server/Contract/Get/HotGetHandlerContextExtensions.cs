@@ -16,9 +16,9 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         public static IHotGetHandlerContext ReadFromStream(this IHotGetHandlerContext ctx, Stream stream) 
         {
             var frame = ctx.Frame;
-            stream.Seek(frame.BytesProcessed, SeekOrigin.Begin);
-            var cnt = stream.Read(frame.Buffer, frame.BytesProcessed, frame.BufferSize);
-            frame.DataArrived(cnt);
+            stream.Seek(frame.BytesTransmitted, SeekOrigin.Begin);
+            var cnt = stream.Read(frame.Buffer, frame.BytesTransmitted, frame.BufferSize);
+            frame.DataTransmitted(cnt);
             return ctx.Ok();
         }
     }

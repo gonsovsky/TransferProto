@@ -1,2 +1,13 @@
 C:\SoftConsult\TransferProto\TestServer\obj\Debug\TestServer.csprojAssemblyReference.cache
 C:\SoftConsult\TransferProto\TestServer\obj\Debug\TestServer.csproj.CoreCompileInputs.cache
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\TestServer.exe
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\TestServer.pdb
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\Atoll.TransferService.Bundle.dll
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\TestContract.dll
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\Newtonsoft.Json.dll
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\Corallite.dll
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\Atoll.TransferService.Bundle.pdb
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\TestContract.pdb
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\TestServer.csproj.CopyComplete
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\TestServer.exe
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\TestServer.pdb
