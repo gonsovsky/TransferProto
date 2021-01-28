@@ -1,17 +1,24 @@
 ﻿using System;
+using System.Net;
 using System.Net.Sockets;
+using Atoll.TransferService.Bundle.Server.Implementation;
 
 namespace Atoll.TransferService.Bundle.Server.Contract.Get
 {
     public class HotGetHandlerContext: IHotGetHandlerContext
     {
-        public HotGetHandlerContext(Socket socket, HotServerConfiguration config)
+        public HotGetHandlerContext(Socket socket, HotServer srv, HotServerConfiguration config)
         {
             Request = new HotGetHandlerRequest(config.BufferSize);
             Socket = socket;
+            Server = srv;
         }
 
+        public HttpStatusCode CallBack;
+
         public Socket Socket { get; set; }
+
+        public HotServer Server { get; set; }
 
         public IHotGetHandler Handler { get; set; }
 
@@ -21,27 +28,32 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
 
         public IHotGetHandlerContext Ok()
         {
-            throw new NotImplementedException();
+            CallBack = HttpStatusCode.OK;
+            return this;
         }
 
         public IHotGetHandlerContext BadRequest(string message = null)
         {
-            throw new NotImplementedException();
+            CallBack = HttpStatusCode.BadRequest;
+            return this;
         }
 
         public IHotGetHandlerContext NotFound(string message = null)
         {
-            throw new NotImplementedException();
+            CallBack = HttpStatusCode.NotFound;
+            return this;
         }
 
         public IHotGetHandlerContext Error(string message = null)
         {
-            throw new NotImplementedException();
+            CallBack = HttpStatusCode.InternalServerError;
+            return this;
         }
 
         public IHotGetHandlerContext NotImplemented(string message = null)
         {
-            throw new NotImplementedException();
+            CallBack = HttpStatusCode.NotImplemented;
+            return this;
         }
     }
 }

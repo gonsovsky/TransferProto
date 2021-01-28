@@ -1,7 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using System.Text;
+﻿using System.Text;
 using Atoll.TransferService.Bundle.Proto;
-using Corallite.Buffers;
 
 namespace Atoll.TransferService.Bundle.Server.Contract.Get
 {
@@ -34,6 +32,7 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
 
         public override bool DataTransmitted(int cnt)
         {
+            base.DataTransmitted(cnt);
             if (BytesTransmitted <= Packet.MinSize)
                 return false;
             var packet = Packet.FromByteArray(Buffer);

@@ -14,16 +14,15 @@ namespace TestClient
             {
                 OnRequest = (party, state) =>
                 {
-                    //Console.WriteLine($"Agent Request : {state.Url} [{state.Gram.Start}/{state.Gram.Length}]");
+                    Console.WriteLine($"Agent Request");
                 },
                 OnResponse = (party, state) =>
                 {
-                    //Console.WriteLine($"Agent Response: {state.Url} [{state.Gram.Start}/{state.Gram.Length}]");
+                    Console.WriteLine($"Agent Response");
                 },
                 OnAbort = (party, state, ex) =>
                 {
-                    //Console.WriteLine(
-                    //    $"Agent Abort   : {state.Url} [{state.Gram.Start}/{state.Gram.Length}] {ex.Message}");
+                    Console.WriteLine($"Agent Abort {ex.Message}");
                 }
             };
             var t = new GetContract()
@@ -32,7 +31,7 @@ namespace TestClient
                 Offset = 0,
                 Length = 500000
             };
-            var result = agent.Cmd("download", t);
+            var result = agent.Cmd("download", t, Commands.Get);
             Console.ReadLine();
         }
     }

@@ -17,7 +17,7 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         {
             var frame = ctx.Frame;
             stream.Seek(frame.BytesTransmitted, SeekOrigin.Begin);
-            var cnt = stream.Read(frame.Buffer, frame.BytesTransmitted, frame.BufferSize);
+            var cnt = stream.Read(frame.Buffer, 0, frame.BufferSize);
             frame.DataTransmitted(cnt);
             return ctx.Ok();
         }

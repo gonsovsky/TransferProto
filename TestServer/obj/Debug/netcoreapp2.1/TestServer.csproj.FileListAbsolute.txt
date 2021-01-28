@@ -1,0 +1,17 @@
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\TestServer.deps.json
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\TestServer.runtimeconfig.json
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\TestServer.runtimeconfig.dev.json
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\TestServer.dll
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\TestServer.pdb
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\Atoll.TransferService.Bundle.dll
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\TestContract.dll
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\Corallite.dll
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\Atoll.TransferService.Bundle.pdb
+C:\SoftConsult\TransferProto\TestServer\bin\Debug\netcoreapp2.1\TestContract.pdb
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\netcoreapp2.1\TestServer.csprojAssemblyReference.cache
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\netcoreapp2.1\TestServer.csproj.CoreCompileInputs.cache
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\netcoreapp2.1\TestServer.AssemblyInfoInputs.cache
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\netcoreapp2.1\TestServer.AssemblyInfo.cs
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\netcoreapp2.1\TestServer.csproj.CopyComplete
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\netcoreapp2.1\TestServer.dll
+C:\SoftConsult\TransferProto\TestServer\obj\Debug\netcoreapp2.1\TestServer.pdb

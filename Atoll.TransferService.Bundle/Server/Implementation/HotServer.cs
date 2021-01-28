@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
 using Atoll.TransferService.Bundle.Proto;
 using Atoll.TransferService.Bundle.Server.Contract;
 using Atoll.TransferService.Bundle.Server.Contract.Get;
@@ -53,9 +52,9 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
         {
             AllDone.Set();
             var client = (Socket)ar.AsyncState;
-            var handler = client.EndAccept(ar);
-            var ctx = new HotGetHandlerContext(listener, config);
-            handler.BeginReceive(ctx.Request.Buffer, 0, ctx.Request.BufferSize, 0,
+            var sock = client.EndAccept(ar);
+            var ctx = new HotGetHandlerContext(sock, config);
+            sock.BeginReceive(ctx.Request.Buffer, 0, ctx.Request.BufferSize, 0,
                 ReadCallback, ctx);
         }
 
@@ -93,7 +92,7 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             }
             else
             {
-                ctx.Socket.BeginReceive(ctx.Request.Buffer, ctx.Request.BytesTransmitted, 
+                ctx.Socket.BeginReceive(ctx.Request.Buffer, ctx.Request.BytesTransmitted,
                     ctx.Request.BufferSize - ctx.Request.BytesTransmitted, 0,
                     ReadCallback, ctx);
             }
@@ -101,7 +100,7 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
 
         private static void SendCallback(IAsyncResult ar)
         {
-            var ctx = (HotGetHandlerContext) ar.AsyncState;
+            var ctx = (HotGetHandlerContext)ar.AsyncState;
             ctx.Socket.EndSend(ar);
             if (ctx.Handler.ReadEnd(ctx))
             {

@@ -13,17 +13,12 @@ namespace TestServer
                             .RouteGet("list",     DefaultGetHandlerFactory<MyHotListFilesHandler>.Instance)
                             .RoutePut("upload",   DefaultPutHandlerFactory<MyHotPutFileHandler>.Instance);
 
-            using (var server = new HotServer()
+            var server = new HotServer()
             {
-                OnRequest = (party, state) => { }
-                // Console.WriteLine($"Hub Request : {state.Url} [{state.Gram.Start}/{state.Gram.Length}]")
-                ,
-                OnResponse = (party, state) => { }
-                // Console.WriteLine($"Hub Response: {state.Url} [{state.Gram.Start}/{state.Gram.Length}]")
-                ,
-                OnAbort = (party, state, ex) => { }
-                //  Console.WriteLine($"Hub Abort   : {ex.Message}")
-            })
+                OnRequest = (party, state) => Console.WriteLine($"Hub Request"),
+                OnResponse = (party, state) => Console.WriteLine($"Hub Response"),
+                OnAbort = (party, state, ex) => Console.WriteLine($"Hub Abort")
+            };
             {
                 server
                     .UseRoutes(routes)

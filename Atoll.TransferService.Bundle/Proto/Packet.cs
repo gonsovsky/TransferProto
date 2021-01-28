@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -9,13 +10,15 @@ namespace Atoll.TransferService.Bundle.Proto
 {
     public struct Packet
     {
+        public Commands CommandId;
+
         public HttpStatusCode StatusCode;
 
-        public int RouteLen;
+        public short RouteLen;
 
         public byte[] RouteData;
 
-        public int HeadLen;
+        public short HeadLen;
 
         public byte[] HeadData;
 
@@ -47,11 +50,12 @@ namespace Atoll.TransferService.Bundle.Proto
             {
                 using (var writer = new BinaryWriter(ms))
                 {
+                    writer.Write((byte)CommandId);
                     writer.Write((int)StatusCode);
                     writer.Write(RouteLen);
                     writer.Write(RouteData);
                     writer.Write(HeadLen);
-                    writer.Write(Head);
+                    writer.Write(HeadData);
                     writer.Write(DataLen);
                 }
             }
@@ -63,25 +67,34 @@ namespace Atoll.TransferService.Bundle.Proto
             {
                 var res = new Packet
                 {
+                    CommandId =  (Commands)reader.ReadByte(),
                     StatusCode = (HttpStatusCode)reader.ReadInt32(),
                     RouteLen = reader.ReadInt16()
                 };
                 res.RouteData = reader.ReadBytes(res.RouteLen);
-                res.HeadLen = reader.ReadInt32();
+                res.HeadLen = reader.ReadInt16();
                 res.HeadData = reader.ReadBytes(res.HeadLen);
                 res.DataLen = reader.ReadInt32();
                 return res;
             }
         }
 
-        public static Packet FromStruct<T>(string route, T a)
+        public static Packet FromStruct<T>(string route, T a, Commands cmdId)
         {
             var res = new Packet
             {
+                CommandId = cmdId,
                 StatusCode = HttpStatusCode.OK,
                 Route = route,
-                Head = Newtonsoft.Json.JsonConvert.SerializeObject(a)
+                Head = Newtonsoft.Json.JsonConvert.SerializeObject(a) 
             };
+            res.Head += new string(' ', res.HeadLen);
+            return res;
+        }
+
+        public T ToStruct<T>()
+        {
+            var res = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Head);;
             return res;
         }
 

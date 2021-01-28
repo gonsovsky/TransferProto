@@ -1,17 +1,6 @@
 {
   "version": 3,
   "targets": {
-    ".NETFramework,Version=v4.0": {
-      "Newtonsoft.Json/12.0.3": {
-        "type": "package",
-        "compile": {
-          "lib/net40/Newtonsoft.Json.dll": {}
-        },
-        "runtime": {
-          "lib/net40/Newtonsoft.Json.dll": {}
-        }
-      }
-    },
     ".NETStandard,Version=v2.0": {
       "Microsoft.NETCore.Platforms/1.1.0": {
         "type": "package",
@@ -225,9 +214,6 @@
     }
   },
   "projectFileDependencyGroups": {
-    ".NETFramework,Version=v4.0": [
-      "Newtonsoft.Json >= 12.0.3"
-    ],
     ".NETStandard,Version=v2.0": [
       "NETStandard.Library >= 2.0.3",
       "Newtonsoft.Json >= 12.0.3"
@@ -255,7 +241,6 @@
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
-        "net40",
         "netstandard2.0"
       ],
       "sources": {
@@ -263,9 +248,6 @@
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
-        "net40": {
-          "projectReferences": {}
-        },
         "netstandard2.0": {
           "projectReferences": {}
         }
@@ -277,14 +259,6 @@
       }
     },
     "frameworks": {
-      "net40": {
-        "dependencies": {
-          "Newtonsoft.Json": {
-            "target": "Package",
-            "version": "[12.0.3, )"
-          }
-        }
-      },
       "netstandard2.0": {
         "dependencies": {
           "NETStandard.Library": {

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 
 namespace Atoll.TransferService.Bundle.Proto
@@ -10,7 +7,7 @@ namespace Atoll.TransferService.Bundle.Proto
 
     public delegate void StateErrorEvent(Party sender, State state, Exception ex);
 
-    public class Party: IDisposable
+    public class Party
     {
         public StateEvent OnRequest { get; set; }
 
@@ -34,11 +31,6 @@ namespace Atoll.TransferService.Bundle.Proto
             OnResponse?.Invoke(this, state);
             AllDone.Reset();
             return null;
-        }
-
-        public void Dispose()
-        {
-            AllDone?.Dispose();
         }
     }
 }

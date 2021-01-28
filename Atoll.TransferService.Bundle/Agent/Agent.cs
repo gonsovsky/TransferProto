@@ -15,11 +15,14 @@ namespace Atoll.TransferService.Bundle.Agent
 
         private readonly int bufferSize;
 
-        public Agent(int port, string net, int bufferSize, Fs fs)
+        private readonly IFs fs;
+
+        public Agent(int port, string net, int bufferSize, IFs fs)
         {
             this.port = port;
             this.net = net;
             this.bufferSize = bufferSize;
+            this.fs = fs;
         }
 
         protected readonly ManualResetEvent ConnectDone =
@@ -28,9 +31,9 @@ namespace Atoll.TransferService.Bundle.Agent
         protected readonly ManualResetEvent SendDone =
             new ManualResetEvent(false);
 
-        public object Cmd<T>(string route, T a) where T: struct 
+        public object Cmd<T>(string route, T a, Commands commandId=Commands.Custom) where T: struct 
         {
-            var state = new AgentState(bufferSize, route, a);
+            var state = new AgentState(bufferSize, route, commandId, a, fs);
             try
             {
                 var ipHostInfo = Dns.GetHostEntry(net);
