@@ -1,28 +1,22 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using Atoll.TransferService.Bundle.Proto;
 using Corallite.Glob;
+using Newtonsoft.Json;
 using TestContract;
 
 namespace Atoll.TransferService.Bundle.Agent
 {
     public class AgentState: State
     {
-        public Packet Packet;
-
         public Socket Socket;
 
         public AgentState(int bufferSize, string route, Commands cmdId, object contract, IFs fs) : base(bufferSize)
         {
             this.fs =fs;
             Packet = Packet.FromStruct(route, contract, cmdId);
-        }
-
-        public void Send()
-        {
-            Packet.ToByteArray(ref Buffer);
-            BufferLen = Packet.MySize;
         }
 
         protected bool HeadRecv;
@@ -41,7 +35,7 @@ namespace Atoll.TransferService.Bundle.Agent
                 Packet = Packet.FromByteArray(Buffer);
                 headDelta = Packet.MySize;
             }
-            if (RecvStream == null)
+            if (RecvStream == null && Packet.StatusCode == HttpStatusCode.OK)
             {
                 switch ((Commands)Packet.CommandId)
                 {
@@ -60,15 +54,23 @@ namespace Atoll.TransferService.Bundle.Agent
             return true;
         }
 
-        public string FileName
+        public override T Result<T>()
         {
-            get
+            RecvStream.Position = 0;
+            using (StreamReader sr = new StreamReader(RecvStream))
             {
-                var contract = Packet.ToStruct<GetContract>();
-                return Path.Combine(Helper.AssemblyDirectory, contract.Url);
+                var x = sr.ReadToEnd();
+                return JsonConvert.DeserializeObject<T>(x, new JsonSerializerSettings(){Formatting = Formatting.Indented} );
             }
         }
 
         private IFs fs;
+
+        public override void Close()
+        {
+            RecvStream?.Close();
+            RecvStream = null;
+            base.Close();
+        }
     }
 }

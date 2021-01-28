@@ -20,14 +20,14 @@ namespace Atoll.TransferService.Bundle.Proto
 
         public virtual void Abort(State state, Exception e)
         {
-            //state?.Abort(e);
-            AllDone.Reset();
             OnAbort?.Invoke(this, state, e);
+            state?.Close();
+            state?.Dispose();
+            AllDone.Reset();
         }
 
         public virtual object Complete(State state)
         {
-            //var res = state.Complete();
             OnResponse?.Invoke(this, state);
             AllDone.Reset();
             return null;

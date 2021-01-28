@@ -1,9 +1,13 @@
 ﻿using System;
+using System.IO;
+using System.Net;
+using System.Net.Sockets;
 using Corallite.Buffers;
+using TestContract;
 
 namespace Atoll.TransferService.Bundle.Proto
 {
-    public class State: IDisposable
+    public abstract class State: IDisposable
     {
         public byte[] Buffer;
 
@@ -12,6 +16,16 @@ namespace Atoll.TransferService.Bundle.Proto
         public int BufferLen;
 
         public int BytesTransmitted;
+
+        public Packet Packet;
+
+        public Socket Socket;
+
+        public void Send()
+        {
+            Packet.ToByteArray(ref Buffer);
+            BufferLen = Packet.MySize;
+        }
 
         public State(int bufferSize)
         {
@@ -25,10 +39,27 @@ namespace Atoll.TransferService.Bundle.Proto
             UniArrayPool<byte>.Shared.Return(this.Buffer);
         }
 
+        public virtual void Close()
+        {
+            if (Socket != null)
+            {
+                Socket?.Shutdown(SocketShutdown.Both);
+                Socket?.Close();
+            }
+        }
+
         public virtual bool DataTransmitted(int len)
         {
             BytesTransmitted += len;
             return false;
         }
+
+        public abstract T Result<T>();
+
+        public string Url => Packet.ToStruct<GetContract>().Url;
+
+        public string FileName => Path.Combine(Helper.AssemblyDirectory, Url);
+
+        public HttpStatusCode StatusCode => Packet.StatusCode;
     }
 }

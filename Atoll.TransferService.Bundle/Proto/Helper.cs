@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization.Formatters.Binary;
+using Newtonsoft.Json;
 
 namespace Atoll.TransferService.Bundle.Proto
 {
@@ -72,5 +73,7 @@ namespace Atoll.TransferService.Bundle.Proto
             var formatter = new BinaryFormatter();
             return (T)formatter.Deserialize(stream);
         }
+
+        public static string ToJson(this object o) => JsonConvert.SerializeObject(o);
     }
 }

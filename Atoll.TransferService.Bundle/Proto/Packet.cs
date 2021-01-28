@@ -5,9 +5,12 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Xml;
+using Newtonsoft.Json;
 
 namespace Atoll.TransferService.Bundle.Proto
 {
+    [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct Packet
     {
         public Commands CommandId;
@@ -26,21 +29,21 @@ namespace Atoll.TransferService.Bundle.Proto
 
         public string Route
         {
-            get => Encoding.UTF8.GetString(RouteData);
+            get => Encoding.ASCII.GetString(RouteData);
             set
             {
-                RouteLen = (short)value.Length;
-                RouteData = Encoding.UTF8.GetBytes(value);
+                RouteData = Encoding.ASCII.GetBytes(value);
+                RouteLen = (short)RouteData.Length;
             }
         }
 
         public string Head
         {
-            get => Encoding.UTF8.GetString(HeadData);
+            get => Encoding.ASCII.GetString(HeadData);
             set
             {
-                HeadLen = (short)value.Length;
-                HeadData = Encoding.UTF8.GetBytes(value);
+                HeadData = Encoding.ASCII.GetBytes(value);
+                HeadLen = (short)HeadData.Length;
             }
         }
 
@@ -61,7 +64,7 @@ namespace Atoll.TransferService.Bundle.Proto
             }
         }
 
-        public static Packet FromByteArray(byte[] bytes)
+        public static unsafe Packet FromByteArray(byte[] bytes)
         {
             using (var reader = new BinaryReader(new MemoryStream(bytes)))
             {
@@ -79,26 +82,28 @@ namespace Atoll.TransferService.Bundle.Proto
             }
         }
 
-        public static Packet FromStruct<T>(string route, T a, Commands cmdId)
+        public static Packet FromStruct<T>(string route, T abc, Commands cmdId)
         {
             var res = new Packet
             {
                 CommandId = cmdId,
                 StatusCode = HttpStatusCode.OK,
                 Route = route,
-                Head = Newtonsoft.Json.JsonConvert.SerializeObject(a) 
+                Head = JsonConvert.SerializeObject(abc) 
             };
-            res.Head += new string(' ', res.HeadLen);
+            //var p = 8 - res.Head.Length % 8;
+            res.Head += new string(' ', 500);
             return res;
         }
 
         public T ToStruct<T>()
         {
-            var res = Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Head);;
+            //.Substring(0,Head.Length-4)
+            var res = JsonConvert.DeserializeObject<T>(Head);;
             return res;
         }
 
-        public int MySize => MinSize + DataLen + HeadLen;
+        public int MySize => MinSize + HeadLen;
 
         public static readonly int MinSize = SizeOf(typeof(Packet));
 

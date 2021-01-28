@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace Atoll.TransferService.Bundle.Server.Contract.Get
 {
@@ -17,7 +18,8 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         {
             var frame = ctx.Frame;
             stream.Seek(frame.BytesTransmitted, SeekOrigin.Begin);
-            var cnt = stream.Read(frame.Buffer, 0, frame.BufferSize);
+            var len = (int)Math.Min(frame.BufferSize, (stream.Length - stream.Position));
+            var cnt = stream.Read(frame.Buffer, 0, len);
             frame.DataTransmitted(cnt);
             return ctx.Ok();
         }

@@ -10,13 +10,11 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         public HotGetHandlerContext(Socket socket, HotServer srv, HotServerConfiguration config)
         {
             Request = new HotGetHandlerRequest(config.BufferSize);
-            Socket = socket;
+            Request.Socket = socket;
             Server = srv;
         }
 
-        public HttpStatusCode CallBack;
-
-        public Socket Socket { get; set; }
+        public HttpStatusCode CallBackStatus;
 
         public HotServer Server { get; set; }
 
@@ -28,31 +26,31 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
 
         public IHotGetHandlerContext Ok()
         {
-            CallBack = HttpStatusCode.OK;
+            CallBackStatus = HttpStatusCode.OK;
             return this;
         }
 
         public IHotGetHandlerContext BadRequest(string message = null)
         {
-            CallBack = HttpStatusCode.BadRequest;
+            CallBackStatus = HttpStatusCode.BadRequest;
             return this;
         }
 
         public IHotGetHandlerContext NotFound(string message = null)
         {
-            CallBack = HttpStatusCode.NotFound;
+            CallBackStatus = HttpStatusCode.NotFound;
             return this;
         }
 
         public IHotGetHandlerContext Error(string message = null)
         {
-            CallBack = HttpStatusCode.InternalServerError;
+            CallBackStatus = HttpStatusCode.InternalServerError;
             return this;
         }
 
         public IHotGetHandlerContext NotImplemented(string message = null)
         {
-            CallBack = HttpStatusCode.NotImplemented;
+            CallBackStatus = HttpStatusCode.NotImplemented;
             return this;
         }
     }

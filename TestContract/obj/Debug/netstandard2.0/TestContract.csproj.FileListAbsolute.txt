@@ -2,10 +2,10 @@ C:\SoftConsult\TransferProto\TestContract\bin\Debug\netstandard2.0\TestContract.
 C:\SoftConsult\TransferProto\TestContract\bin\Debug\netstandard2.0\TestContract.dll
 C:\SoftConsult\TransferProto\TestContract\bin\Debug\netstandard2.0\TestContract.pdb
 C:\SoftConsult\TransferProto\TestContract\bin\Debug\netstandard2.0\Corallite.dll
-C:\SoftConsult\TransferProto\TestContract\obj\Debug\netstandard2.0\TestContract.csprojAssemblyReference.cache
 C:\SoftConsult\TransferProto\TestContract\obj\Debug\netstandard2.0\TestContract.csproj.CoreCompileInputs.cache
 C:\SoftConsult\TransferProto\TestContract\obj\Debug\netstandard2.0\TestContract.AssemblyInfoInputs.cache
 C:\SoftConsult\TransferProto\TestContract\obj\Debug\netstandard2.0\TestContract.AssemblyInfo.cs
 C:\SoftConsult\TransferProto\TestContract\obj\Debug\netstandard2.0\TestContract.csproj.CopyComplete
 C:\SoftConsult\TransferProto\TestContract\obj\Debug\netstandard2.0\TestContract.dll
 C:\SoftConsult\TransferProto\TestContract\obj\Debug\netstandard2.0\TestContract.pdb
+C:\SoftConsult\TransferProto\TestContract\obj\Debug\netstandard2.0\TestContract.csprojAssemblyReference.cache

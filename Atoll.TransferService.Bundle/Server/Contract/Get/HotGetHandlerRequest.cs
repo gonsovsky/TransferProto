@@ -35,11 +35,16 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
             base.DataTransmitted(cnt);
             if (BytesTransmitted <= Packet.MinSize)
                 return false;
-            var packet = Packet.FromByteArray(Buffer);
-            this.Route = packet.Route;
-            this.HeadLength = packet.HeadLen;
-            this.Head = packet.HeadData;
+            Packet = Packet.FromByteArray(Buffer);
+            this.Route = Packet.Route;
+            this.HeadLength = Packet.HeadLen;
+            this.Head = Packet.HeadData;
             return true;
+        }
+
+        public override T Result<T>()
+        {
+            throw new System.NotImplementedException();
         }
 
         public HotGetHandlerRequest(int bufferSize) : base(bufferSize)

@@ -1,6 +1,9 @@
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Atoll.TransferService.Bundle.Agent;
 using Atoll.TransferService.Bundle.Proto;
+using Newtonsoft.Json;
 using TestContract;
 
 namespace TestClient
@@ -14,17 +17,21 @@ namespace TestClient
             {
                 OnRequest = (party, state) =>
                 {
-                    Console.WriteLine($"Agent Request");
+                    Console.WriteLine($"Agent Request {state.Packet.CommandId}: {state.Packet.ToStruct<GetContract>().Url}");
                 },
                 OnResponse = (party, state) =>
                 {
-                    Console.WriteLine($"Agent Response");
+                    if (state.Packet.CommandId==Commands.List) 
+                        Console.WriteLine($"\r\n{state.Result<FsInfo[]>().ToJson()}");
+                    else
+                        Console.WriteLine($@"Agent Response {state.Packet.CommandId}:  {state.Packet.ToStruct<GetContract>().Url} - {state.StatusCode}");
                 },
                 OnAbort = (party, state, ex) =>
                 {
-                    Console.WriteLine($"Agent Abort {ex.Message}");
+                    Console.WriteLine($"Agent Abort {state.Packet.CommandId}: {ex.Message}");
                 }
             };
+            
             var t = new GetContract()
             {
                 Url = "123.txt",
@@ -32,6 +39,13 @@ namespace TestClient
                 Length = 500000
             };
             var result = agent.Cmd("download", t, Commands.Get);
+            t.Url = "abc.txt";
+            agent.Cmd("download", t, Commands.Get);
+            t.Url = "../../../../../../pagefile.sys";
+            agent.Cmd("download", t, Commands.Get);
+            
+            agent.Cmd("listen", new ListContract(){Url="/"}, Commands.List);
+
             Console.ReadLine();
         }
     }

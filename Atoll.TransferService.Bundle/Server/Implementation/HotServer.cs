@@ -53,7 +53,7 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             AllDone.Set();
             var client = (Socket)ar.AsyncState;
             var sock = client.EndAccept(ar);
-            var ctx = new HotGetHandlerContext(sock, config);
+            var ctx = new HotGetHandlerContext(sock, this, config);
             sock.BeginReceive(ctx.Request.Buffer, 0, ctx.Request.BufferSize, 0,
                 ReadCallback, ctx);
         }
@@ -61,7 +61,7 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
         public void ReadCallback(IAsyncResult ar)
         {
             var ctx = (HotGetHandlerContext)ar.AsyncState;
-            var bytesRead = ctx.Socket.EndReceive(ar);
+            var bytesRead = ctx.Request.Socket.EndReceive(ar);
             if (bytesRead <= 0)
                 return;
             if (ctx.Request.DataTransmitted(bytesRead))
@@ -72,17 +72,23 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
                     {
                         if (routes.GetRoutes.TryGetValue(ctx.Request.Route, out var factory))
                         {
-                            ctx.Frame = new HotGetHandlerFrame(config.BufferSize);
+                            ctx.Frame = new HotGetHandlerFrame(config.BufferSize)
+                            {
+                                Socket = ctx.Request.Socket,
+                                Packet = ctx.Request.Packet
+                            };
                             ctx.Handler = factory.Create(ctx);
                             ctx.Handler.Open(ctx);
+                            ctx.Frame.Packet.StatusCode = ctx.CallBackStatus;
+                            OnRequest?.Invoke(this, ctx.Request);
                         }
                         else
                         {
                             throw new ApplicationException($"Unregistered route {ctx.Request.Route}");
                         }
                     }
-                    ctx.Handler.Read(ctx);
-                    ctx.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BytesTransmitted, 0,
+                    ctx.Frame.Send();
+                    ctx.Frame.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BufferLen, 0,
                         SendCallback, ctx);
                 }
                 finally
@@ -92,24 +98,30 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             }
             else
             {
-                ctx.Socket.BeginReceive(ctx.Request.Buffer, ctx.Request.BytesTransmitted,
+                ctx.Frame.Socket.BeginReceive(ctx.Request.Buffer, ctx.Request.BytesTransmitted,
                     ctx.Request.BufferSize - ctx.Request.BytesTransmitted, 0,
                     ReadCallback, ctx);
             }
         }
 
-        private static void SendCallback(IAsyncResult ar)
+        void SendCallback(IAsyncResult ar)
         {
             var ctx = (HotGetHandlerContext)ar.AsyncState;
-            ctx.Socket.EndSend(ar);
+            ctx.Frame.Socket.EndSend(ar);
+            if (ctx.Frame.StatusCode != HttpStatusCode.OK)
+            {
+                Complete(ctx.Frame);
+                return;
+            }
             if (ctx.Handler.ReadEnd(ctx))
             {
+                Complete(ctx.Frame);
                 ctx.Ok();
             }
             else
             {
                 ctx.Handler.Read(ctx);
-                ctx.Socket.BeginSend(ctx.Frame.Buffer, ctx.Frame.BytesTransmitted, ctx.Frame.BufferSize, 0,
+                ctx.Frame.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BufferLen, 0,
                     SendCallback, ctx);
             }
         }
@@ -133,6 +145,13 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
 
         public void Dispose()
         {
+        }
+
+        public override object Complete(State state)
+        {
+            state?.Close();
+            state?.Dispose();
+            return base.Complete(state);
         }
     }
 }

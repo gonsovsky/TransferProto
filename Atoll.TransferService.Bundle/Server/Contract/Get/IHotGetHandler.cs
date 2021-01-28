@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace Atoll.TransferService.Bundle.Server.Contract.Get
 {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using Atoll.TransferService.Bundle.Server.Contract.Get;
 using TestContract;
 
@@ -15,11 +16,7 @@ namespace TestServer
             GetContract contract;
             try
             {
-                //изъять контракт из контеста запроса "удобно"
                 contract = request.GetContract<GetContract>();
-
-                //изъятие контракта в сыром виде
-                //move(&struct, request.Head, request.HeadLen)
             }
             catch
             {

@@ -10,14 +10,17 @@ namespace TestServer
         {
             var routes = new HotServerRouteCollection()
                             .RouteGet("download", DefaultGetHandlerFactory<MyHotGetFileHandler>.Instance)
-                            .RouteGet("list",     DefaultGetHandlerFactory<MyHotListFilesHandler>.Instance)
+                            .RouteGet("listen",   DefaultGetHandlerFactory<MyHotListFilesHandler>.Instance)
                             .RoutePut("upload",   DefaultPutHandlerFactory<MyHotPutFileHandler>.Instance);
 
             var server = new HotServer()
             {
-                OnRequest = (party, state) => Console.WriteLine($"Hub Request"),
-                OnResponse = (party, state) => Console.WriteLine($"Hub Response"),
-                OnAbort = (party, state, ex) => Console.WriteLine($"Hub Abort")
+                OnRequest = (party, state) => 
+                    Console.WriteLine($"Server Request  {state.Packet.CommandId}: {state.Url}"),
+                OnResponse = (party, state) => 
+                    Console.WriteLine($"Server Response {state.Packet.CommandId}: {state.StatusCode}"),
+                OnAbort = (party, state, ex) => 
+                    Console.WriteLine($"Server Abort    {state.Packet.CommandId}: {ex?.Message}")
             };
             {
                 server

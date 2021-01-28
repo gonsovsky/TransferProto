@@ -1,31 +1,28 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Text;
+using Atoll.TransferService.Bundle.Proto;
 using Atoll.TransferService.Bundle.Server.Contract.Get;
 
 namespace TestServer
 {
-
     public class MyHotListFilesHandler : IHotGetHandler
     {
-
         private MemoryStream responseStream;
 
         public IHotGetHandlerContext Open(IHotGetHandlerContext ctx)
         {
             this.responseStream = new MemoryStream();
-
+            var fs = new Fs(Helper.AssemblyDirectory);
+            var data =fs.List("").ToJson();
             using (var wrap = new NonClosableStreamWrap(this.responseStream))
             using (var writer = new StreamWriter(wrap, Encoding.UTF8))
             {
-                foreach (var name in Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "*"))
-                {
-                    writer.WriteLine(name);
-                }
-
+                writer.Write(data);
                 writer.Flush();
             }
-
+            this.responseStream.Position = 0;
             return ctx.Ok();
         }
 
@@ -36,7 +33,7 @@ namespace TestServer
 
         public bool ReadEnd(IHotGetHandlerContext ctx)
         {
-            throw new NotImplementedException();
+            return responseStream.Position == responseStream.Length;
         }
 
         public void Dispose()

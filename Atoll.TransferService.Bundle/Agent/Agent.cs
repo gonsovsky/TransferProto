@@ -138,6 +138,8 @@ namespace Atoll.TransferService.Bundle.Agent
 
         public override void Abort(State state, Exception e)
         {
+            state?.Close();
+            state?.Dispose();
             ConnectDone.Reset();
             SendDone.Reset();
             base.Abort(state, e);
@@ -145,9 +147,13 @@ namespace Atoll.TransferService.Bundle.Agent
 
         public override object Complete(State state)
         {
+            OnResponse?.Invoke(this, state);
+            state?.Close();
+            state?.Dispose();
             ConnectDone.Reset();
             SendDone.Reset();
-            return base.Complete(state);
+            AllDone.Reset();
+            return null;
         }
     }
 }

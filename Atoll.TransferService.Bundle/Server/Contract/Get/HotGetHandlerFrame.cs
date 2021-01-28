@@ -13,7 +13,14 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
 
         public override bool DataTransmitted(int len)
         {
-            return base.DataTransmitted(len);
+            BufferLen = len;
+            base.DataTransmitted(len);
+            return true;
+        }
+
+        public override T Result<T>()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
