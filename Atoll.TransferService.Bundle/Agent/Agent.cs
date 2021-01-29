@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using Atoll.TransferService.Bundle.Proto;
 
@@ -78,6 +79,7 @@ namespace Atoll.TransferService.Bundle.Agent
             }
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void Send(AgentState state)
         {
             state.Send();
@@ -91,8 +93,16 @@ namespace Atoll.TransferService.Bundle.Agent
             try
             {
                 state.Socket.EndSend(ar);
-                SendDone.Set();
-                OnRequest?.Invoke(this, state);
+
+                if (state.HasSend() == false)
+                {
+                    SendDone.Set();
+                    OnRequest?.Invoke(this, state);
+                }
+                else
+                {
+                    Send(state);
+                }
             }
             catch (Exception e)
             {

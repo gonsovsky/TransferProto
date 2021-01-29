@@ -21,10 +21,23 @@ namespace Atoll.TransferService.Bundle.Proto
 
         public Socket Socket;
 
-        public void Send()
+        protected bool HeadRecv;
+
+        protected bool HeadSent;
+
+        public virtual bool Send()
         {
+            if (HeadSent)
+                return false;
+            HeadSent = true;
             Packet.ToByteArray(ref Buffer);
             BufferLen = Packet.MySize;
+            return true;
+        }
+
+        public virtual bool HasSend()
+        {
+            return false;
         }
 
         public State(int bufferSize)

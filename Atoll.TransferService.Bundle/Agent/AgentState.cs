@@ -14,10 +14,9 @@ namespace Atoll.TransferService.Bundle.Agent
         public AgentState(int bufferSize, string route, Commands cmdId, object contract, Stream data, IFs fs) : base(bufferSize)
         {
             this.fs =fs;
+            this.SendData = data;
             Packet = Packet.FromStruct(route, cmdId, contract, data );
         }
-
-        protected bool HeadRecv;
 
         protected Stream RecvStream;
 
@@ -38,6 +37,7 @@ namespace Atoll.TransferService.Bundle.Agent
                 switch ((Commands)Packet.CommandId)
                 {
                     case Commands.List:
+                    case Commands.Put:
                         RecvStream = new MemoryStream();
                         break;
                     case Commands.Get:
@@ -51,6 +51,33 @@ namespace Atoll.TransferService.Bundle.Agent
             return true;
         }
 
+        public override bool Send()
+        {
+            if (base.Send())
+                return true;
+            if (!HasSend())
+                return false;
+            //SendData.Seek(bytesSent, SeekOrigin.Begin);
+            var len = (int)Math.Min(BufferSize, (SendData.Length - SendData.Position));
+            var cnt = SendData.Read(Buffer, 0, len);
+            bytesSent += 1;
+            BufferLen = len;
+            return true;
+        }
+
+        private int bytesSent; 
+
+        public override bool HasSend()
+        {
+            if (HeadSent == false)
+                return true;
+            if (SendData == null)
+                return false;
+            if (Packet.CommandId != Commands.Put || SendData == null)
+                return false;
+            return SendData.Position < SendData.Length;
+        }
+
         public override T Result<T>()
         {
             RecvStream.Position = 0;
@@ -61,7 +88,9 @@ namespace Atoll.TransferService.Bundle.Agent
             }
         }
 
-        private IFs fs;
+        private readonly IFs fs;
+
+        protected Stream SendData; 
 
         public override void Close()
         {

@@ -14,6 +14,8 @@ namespace Atoll.TransferService.Bundle.Server.Contract
         /// <returns>контекст запроса.</returns>
         IContext Open(IContext ctx);
 
+        void Close(IContext ctx);
+
         /// <summary>
         /// Выполнить итерацию чтения данных.
         /// </summary>
@@ -21,7 +23,9 @@ namespace Atoll.TransferService.Bundle.Server.Contract
         /// <returns>контекст запроса.</returns>
         IContext Read(IContext ctx);
 
-        bool ReadEnd(IContext ctx);
+        bool DataSent(IContext ctx);
+
+        bool DataReceived(IContext ctx);
     }
 
     public interface IHandlerPut : IHandler

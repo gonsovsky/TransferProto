@@ -6,39 +6,42 @@ using Atoll.TransferService.Bundle.Server.Handler;
 
 namespace TestServer.Handlers
 {
-    public class MyHotListFilesHandler : IHandler
+    public class MyHotListFilesHandler : Custom
     {
-        private MemoryStream responseStream;
-
-        public IContext Open(IContext ctx)
+        public override IContext Open(IContext ctx)
         {
-            this.responseStream = new MemoryStream();
+            this.Stream = new MemoryStream();
             var fs = new Fs(Atoll.TransferService.Bundle.Proto.Helper.AssemblyDirectory);
             var data =fs.List("").ToJson();
-            using (var wrap = new ImmortalStream(this.responseStream))
+            using (var wrap = new ImmortalStream(this.Stream))
             using (var writer = new StreamWriter(wrap, Encoding.UTF8))
             {
                 writer.Write(data);
                 writer.Flush();
             }
-            this.responseStream.Position = 0;
+            this.Stream.Position = 0;
             return ctx.Ok();
         }
-
-        public IContext Read(IContext ctx)
+        
+        public override IContext Read(IContext ctx)
         {
-            return ctx.ReadFromStream(this.responseStream);
+            ctx.ReadFromStream(this.Stream);
+            return ctx;
         }
 
-        public bool ReadEnd(IContext ctx)
+        public override IContext Write(IContext ctx)
         {
-            return responseStream.Position == responseStream.Length;
+            throw new System.NotImplementedException();
         }
 
-        public void Dispose()
+        public override bool DataSent(IContext ctx)
         {
-            try { this.responseStream.Dispose(); } catch { /* IGNORED */ }
+            return Ready;
         }
 
+        public override bool DataReceived(IContext ctx)
+        {
+            return true;
+        }
     }
 }

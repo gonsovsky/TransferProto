@@ -33,8 +33,11 @@ namespace Atoll.TransferService.Bundle.Server.Handler
         public override bool DataTransmitted(int cnt)
         {
             base.DataTransmitted(cnt);
+            if (HeadRecv)
+                return true;
             if (BytesTransmitted <= Packet.MinSize)
                 return false;
+            HeadRecv = true;
             Packet = Packet.FromByteArray(Buffer);
             this.Route = Packet.Route;
             this.HeadLength = Packet.HeadLen;

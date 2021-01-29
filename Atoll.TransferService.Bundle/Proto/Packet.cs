@@ -23,7 +23,7 @@ namespace Atoll.TransferService.Bundle.Proto
 
         public byte[] HeadData;
 
-        public int DataLen;
+        public long DataLen;
 
         public string Route
         {
@@ -87,7 +87,8 @@ namespace Atoll.TransferService.Bundle.Proto
                 CommandId = cmdId,
                 StatusCode = HttpStatusCode.OK,
                 Route = route,
-                Head = JsonConvert.SerializeObject(contract) 
+                Head = JsonConvert.SerializeObject(contract) ,
+                DataLen = data?.Length ?? 0
             };
             //var p = 8 - res.Head.Length % 8;
             res.Head += new string(' ', 500);

@@ -5,11 +5,9 @@ using Atoll.TransferService.Bundle.Server.Handler;
 
 namespace TestServer.Handlers
 {
-    public class MyHotPutFileHandler : IHandlerPut
+    public class MyHotPutFileHandler : Custom
     {
-        private FileStream fileStream;
-
-        public IContext Open(IContext ctx)
+        public override IContext Open(IContext ctx)
         {
         //    var request = ctx.Request;
 
@@ -44,24 +42,25 @@ namespace TestServer.Handlers
         return ctx.Ok();
         }
 
-        public IContext Write(IContext ctx) =>
-            ctx.WriteToStream(this.fileStream);
-
-        public void Dispose()
-        {
-            try { this.fileStream.Close(); } catch { /* IGNORED */ }
-            try { this.fileStream.Dispose(); } catch { /* IGNORED */ }
-            this.fileStream = null;
-        }
-
-        public IContext Read(IContext ctx)
+        public override IContext Read(IContext ctx)
         {
             throw new NotImplementedException();
         }
 
-        public bool ReadEnd(IContext ctx)
+        public override IContext Write(IContext ctx)
         {
-            throw new NotImplementedException();
+            ctx.WriteToStream(this.Stream);
+            return ctx;
+        }
+
+        public override bool DataSent(IContext ctx)
+        {
+            return true;
+        }
+
+        public override bool DataReceived(IContext ctx)
+        {
+            return Ready;
         }
     }
 

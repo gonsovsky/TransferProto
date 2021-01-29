@@ -112,7 +112,7 @@ namespace Atoll.TransferService.Bundle.Server
                 Complete(ctx.Frame);
                 return;
             }
-            if (ctx.Handler.ReadEnd(ctx))
+            if (ctx.Handler.DataSent(ctx))
             {
                 Complete(ctx.Frame);
                 ctx.Ok();

@@ -6,11 +6,9 @@ using TestContract;
 
 namespace TestServer.Handlers
 {
-    public class Get : IHandler
+    public class Get : Custom
     {
-        private FileStream fileStream;
-
-        public IContext Open(IContext ctx)
+        public override IContext Open(IContext ctx)
         {
             var request = ctx.Request;
             GetContract contract;
@@ -28,7 +26,7 @@ namespace TestServer.Handlers
             var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, contract.Url);
             try
             {
-                this.fileStream = new FileStream(
+                this.Stream = new FileStream(
                     filePath,
                     FileMode.Open,
                     FileAccess.Read,
@@ -50,19 +48,26 @@ namespace TestServer.Handlers
             return ctx.Ok();
         }
 
-        public IContext Read(IContext ctx) =>
-            ctx.ReadFromStream(this.fileStream);
-
-        public Boolean ReadEnd(IContext ctx)
+        public override IContext Read(IContext ctx)
         {
-            return fileStream.Position == fileStream.Length;
+            ctx.ReadFromStream(this.Stream);
+            return ctx;
         }
 
-        public void Dispose()
+        public override IContext Write(IContext ctx)
         {
-            try { this.fileStream.Close(); } catch { /* IGNORED */ }
-            try { this.fileStream.Dispose(); } catch { /* IGNORED */ }
-            this.fileStream = null;
+            throw new NotImplementedException();
         }
+
+        public override Boolean DataSent(IContext ctx)
+        {
+            return Ready;
+        }
+
+        public override bool DataReceived(IContext ctx)
+        {
+            return true;
+        }
+
     }
 }
