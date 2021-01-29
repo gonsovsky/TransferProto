@@ -2,19 +2,18 @@
 using System.Net;
 using System.Net.Sockets;
 using Atoll.TransferService.Bundle.Proto;
-using Atoll.TransferService.Bundle.Server.Contract;
-using Atoll.TransferService.Bundle.Server.Contract.Get;
+using Atoll.TransferService.Bundle.Server.Handler;
 
-namespace Atoll.TransferService.Bundle.Server.Implementation
+namespace Atoll.TransferService.Bundle.Server
 {
     /// <summary>
     /// Реализация сервера приема и передачи данных.
     /// </summary>
     public sealed class HotServer : Party
     {
-        private HotServerConfiguration config;
+        private Config config;
 
-        private HotServerRouteCollection routes;
+        private RoutesCollection routesCollection;
 
         private Socket listener;
 
@@ -53,14 +52,14 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             AllDone.Set();
             var client = (Socket)ar.AsyncState;
             var sock = client.EndAccept(ar);
-            var ctx = new HotGetHandlerContext(sock, this, config);
+            var ctx = new Context(sock, this, config);
             sock.BeginReceive(ctx.Request.Buffer, 0, ctx.Request.BufferSize, 0,
                 ReadCallback, ctx);
         }
 
         public void ReadCallback(IAsyncResult ar)
         {
-            var ctx = (HotGetHandlerContext)ar.AsyncState;
+            var ctx = (Context)ar.AsyncState;
             var bytesRead = ctx.Request.Socket.EndReceive(ar);
             if (bytesRead <= 0)
                 return;
@@ -70,9 +69,9 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
                 {
                     if (ctx.Handler == null)
                     {
-                        if (routes.GetRoutes.TryGetValue(ctx.Request.Route, out var factory))
+                        if (routesCollection.Routes.TryGetValue(ctx.Request.Route, out var factory))
                         {
-                            ctx.Frame = new HotGetHandlerFrame(config.BufferSize)
+                            ctx.Frame = new Frame(config.BufferSize)
                             {
                                 Socket = ctx.Request.Socket,
                                 Packet = ctx.Request.Packet
@@ -106,7 +105,7 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
 
         void SendCallback(IAsyncResult ar)
         {
-            var ctx = (HotGetHandlerContext)ar.AsyncState;
+            var ctx = (Context)ar.AsyncState;
             ctx.Frame.Socket.EndSend(ar);
             if (ctx.Frame.StatusCode != HttpStatusCode.OK)
             {
@@ -127,19 +126,17 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
         }
 
 
-        public HotServer UseConfig(HotServerConfiguration aCfg)
+        public HotServer UseConfig(Config aCfg)
         {
             this.config = aCfg;
             return this;
         }
 
-        public HotServer UseRoutes(HotServerRouteCollection aRoutes)
+        public HotServer UseRoutes(RoutesCollection aRoutesCollection)
         {
-            this.routes = new HotServerRouteCollection();
-            foreach (var route in aRoutes.GetRoutes)
-                this.routes.RouteGet(route.Key, route.Value);
-            foreach (var route in aRoutes.PutRoutes)
-                this.routes.RoutePut(route.Key, route.Value);
+            this.routesCollection = new RoutesCollection();
+            foreach (var route in aRoutesCollection.Routes)
+                this.routesCollection.RouteGet(route.Key, route.Value);
             return this;
         }
 

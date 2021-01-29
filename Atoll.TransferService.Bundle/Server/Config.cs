@@ -1,9 +1,9 @@
-﻿namespace Atoll.TransferService.Bundle.Server.Contract
+﻿namespace Atoll.TransferService.Bundle.Server
 {
     /// <summary>
     /// Описатель конфигурации сервера.
     /// </summary>
-    public sealed class HotServerConfiguration
+    public sealed class Config
     {
         /// <summary>
         /// Порт сервера.

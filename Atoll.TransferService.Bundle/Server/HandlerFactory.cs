@@ -1,27 +1,25 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using Atoll.TransferService.Bundle.Server.Contract.Get;
+using Atoll.TransferService.Bundle.Server.Contract;
 
-namespace Atoll.TransferService.Bundle.Server.Contract
+namespace Atoll.TransferService.Bundle.Server
 {
-
     /// <summary>
     /// Реализация фабрики обработчиков запросов получения данных, выполняющей вызов конструктора по-умолчанию.
     /// </summary>
     /// <typeparam name="THandler"></typeparam>
-    public sealed class DefaultGetHandlerFactory<THandler> : IHotGetHandlerFactory where THandler : IHotGetHandler
+    public class HandlerFactory<THandler> : IFactory where THandler : Handler.IHandler
     {
-
         /// <summary>
         /// Синглетон-экземпляр фабрики.
         /// </summary>
-        public static readonly DefaultGetHandlerFactory<THandler> Instance;
+        public static readonly HandlerFactory<THandler> Instance;
 
         /// <summary>
         /// Статический конструктор фабрики.
         /// </summary>
-        static DefaultGetHandlerFactory() 
+        static HandlerFactory() 
         {
             // Получаем тип обработчика.
             var handlerType = typeof(THandler);
@@ -49,14 +47,14 @@ namespace Atoll.TransferService.Bundle.Server.Contract
             var constructorMethod = Expression.Lambda<Func<THandler>>(Expression.New(constructorInfo)).Compile();
 
             // Создаем синглетон-экземпляр фабрики.
-            Instance = new DefaultGetHandlerFactory<THandler>(constructorMethod);
+            Instance = new HandlerFactory<THandler>(constructorMethod);
         }
 
         /// <summary>
         /// Конструктор.
         /// </summary>
         /// <param name="factoryMethod">экземпляр метода, выполняющего создание.</param>
-        private DefaultGetHandlerFactory(Func<THandler> factoryMethod) 
+        protected HandlerFactory(Func<THandler> factoryMethod) 
         {
             this.factoryMethod = factoryMethod ?? throw new ArgumentNullException(nameof(factoryMethod));
         }
@@ -67,9 +65,15 @@ namespace Atoll.TransferService.Bundle.Server.Contract
         private readonly Func<THandler> factoryMethod;
 
         /// <inheritdoc />
-        IHotGetHandler IHotGetHandlerFactory.Create(IHotGetHandlerContext ctx) => 
+        Handler.IHandler IFactory.Create(IHotGetHandlerContext ctx) => 
             this.factoryMethod();
+    }
 
+    public class PutHandlerFactory<THandler> : HandlerFactory<THandler> where THandler : Handler.IHandler
+    {
+        protected PutHandlerFactory(Func<THandler> factoryMethod) : base(factoryMethod)
+        {
+        }
     }
 
 }

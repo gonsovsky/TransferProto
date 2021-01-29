@@ -1,12 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Net;
-using Atoll.TransferService.Bundle.Server.Contract.Get;
+using Atoll.TransferService.Bundle.Server.Contract;
+using Atoll.TransferService.Bundle.Server.Handler;
 using TestContract;
 
 namespace TestServer
 {
-    public class MyHotGetFileHandler : IHotGetHandler
+    public class MyHotGetFileHandler : IHandler
     {
         private FileStream fileStream;
 

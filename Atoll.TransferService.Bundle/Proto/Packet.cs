@@ -1,11 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Xml;
 using Newtonsoft.Json;
 
 namespace Atoll.TransferService.Bundle.Proto
@@ -82,14 +80,14 @@ namespace Atoll.TransferService.Bundle.Proto
             }
         }
 
-        public static Packet FromStruct<T>(string route, T abc, Commands cmdId)
+        public static Packet FromStruct<T>(string route, Commands cmdId, T contract, Stream data)
         {
             var res = new Packet
             {
                 CommandId = cmdId,
                 StatusCode = HttpStatusCode.OK,
                 Route = route,
-                Head = JsonConvert.SerializeObject(abc) 
+                Head = JsonConvert.SerializeObject(contract) 
             };
             //var p = 8 - res.Head.Length % 8;
             res.Head += new string(' ', 500);

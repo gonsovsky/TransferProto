@@ -221,7 +221,8 @@
         "type": "project",
         "framework": ".NETStandard,Version=v2.0",
         "dependencies": {
-          "Newtonsoft.Json": "12.0.3"
+          "Newtonsoft.Json": "12.0.3",
+          "TestContract": "1.0.0"
         },
         "compile": {
           "bin/placeholder/Atoll.TransferService.Bundle.dll": {}

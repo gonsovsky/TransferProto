@@ -1,6 +1,5 @@
 ﻿using System;
-using Atoll.TransferService.Bundle.Server.Contract;
-using Atoll.TransferService.Bundle.Server.Implementation;
+using Atoll.TransferService.Bundle.Server;
 
 namespace TestServer
 {
@@ -8,10 +7,10 @@ namespace TestServer
     {
         private static void Main()
         {
-            var routes = new HotServerRouteCollection()
-                            .RouteGet("download", DefaultGetHandlerFactory<MyHotGetFileHandler>.Instance)
-                            .RouteGet("listen",   DefaultGetHandlerFactory<MyHotListFilesHandler>.Instance)
-                            .RoutePut("upload",   DefaultPutHandlerFactory<MyHotPutFileHandler>.Instance);
+            var routes = new RoutesCollection()
+                            .RouteGet("get", HandlerFactory<MyHotGetFileHandler>.Instance)
+                            .RouteGet("list",   HandlerFactory<MyHotListFilesHandler>.Instance)
+                            .RoutePut("put", PutHandlerFactory<MyHotPutFileHandler>.Instance);
 
             var server = new HotServer()
             {
@@ -25,7 +24,7 @@ namespace TestServer
             {
                 server
                     .UseRoutes(routes)
-                    .UseConfig(new HotServerConfiguration { Port = 3000 });
+                    .UseConfig(new Config { Port = 3000 });
 
                 server.Start();
             }

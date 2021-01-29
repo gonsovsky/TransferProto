@@ -3,9 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using Atoll.TransferService.Bundle.Proto;
-using Corallite.Glob;
 using Newtonsoft.Json;
-using TestContract;
 
 namespace Atoll.TransferService.Bundle.Agent
 {
@@ -13,10 +11,10 @@ namespace Atoll.TransferService.Bundle.Agent
     {
         public Socket Socket;
 
-        public AgentState(int bufferSize, string route, Commands cmdId, object contract, IFs fs) : base(bufferSize)
+        public AgentState(int bufferSize, string route, Commands cmdId, object contract, Stream data, IFs fs) : base(bufferSize)
         {
             this.fs =fs;
-            Packet = Packet.FromStruct(route, contract, cmdId);
+            Packet = Packet.FromStruct(route, cmdId, contract, data );
         }
 
         protected bool HeadRecv;
@@ -40,7 +38,6 @@ namespace Atoll.TransferService.Bundle.Agent
                 switch ((Commands)Packet.CommandId)
                 {
                     case Commands.List:
-                    case Commands.Head:
                         RecvStream = new MemoryStream();
                         break;
                     case Commands.Get:

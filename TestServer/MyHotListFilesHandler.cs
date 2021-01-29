@@ -1,20 +1,19 @@
-﻿using System;
-using System.IO;
-using System.Net;
+﻿using System.IO;
 using System.Text;
 using Atoll.TransferService.Bundle.Proto;
-using Atoll.TransferService.Bundle.Server.Contract.Get;
+using Atoll.TransferService.Bundle.Server.Contract;
+using Atoll.TransferService.Bundle.Server.Handler;
 
 namespace TestServer
 {
-    public class MyHotListFilesHandler : IHotGetHandler
+    public class MyHotListFilesHandler : IHandler
     {
         private MemoryStream responseStream;
 
         public IHotGetHandlerContext Open(IHotGetHandlerContext ctx)
         {
             this.responseStream = new MemoryStream();
-            var fs = new Fs(Helper.AssemblyDirectory);
+            var fs = new Fs(Atoll.TransferService.Bundle.Proto.Helper.AssemblyDirectory);
             var data =fs.List("").ToJson();
             using (var wrap = new NonClosableStreamWrap(this.responseStream))
             using (var writer = new StreamWriter(wrap, Encoding.UTF8))

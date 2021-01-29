@@ -1,16 +1,14 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using Atoll.TransferService.Bundle.Server.Implementation;
+using Atoll.TransferService.Bundle.Server.Contract;
 
-namespace Atoll.TransferService.Bundle.Server.Contract.Get
+namespace Atoll.TransferService.Bundle.Server.Handler
 {
-    public class HotGetHandlerContext: IHotGetHandlerContext
+    public class Context: IHotGetHandlerContext
     {
-        public HotGetHandlerContext(Socket socket, HotServer srv, HotServerConfiguration config)
+        public Context(Socket socket, HotServer srv, Config config)
         {
-            Request = new HotGetHandlerRequest(config.BufferSize);
-            Request.Socket = socket;
+            Request = new Request(config.BufferSize) {Socket = socket};
             Server = srv;
         }
 
@@ -18,11 +16,11 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
 
         public HotServer Server { get; set; }
 
-        public IHotGetHandler Handler { get; set; }
+        public IHandler Handler { get; set; }
 
-        public HotGetHandlerRequest Request { get; }
+        public Request Request { get; }
 
-        public HotGetHandlerFrame Frame { get; set; }
+        public Frame Frame { get; set; }
 
         public IHotGetHandlerContext Ok()
         {

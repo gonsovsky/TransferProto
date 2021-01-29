@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Net;
+using Atoll.TransferService.Bundle.Server.Contract;
 
-namespace Atoll.TransferService.Bundle.Server.Contract.Get
+namespace Atoll.TransferService.Bundle.Server.Handler
 {
     /// <summary>
     /// Контракт обработчика запроса получения данных.
     /// </summary>
-    public interface IHotGetHandler : IDisposable
+    public interface IHandler : IDisposable
     {
         /// <summary>
         /// Выполнить инициализацию обработчика запроса.

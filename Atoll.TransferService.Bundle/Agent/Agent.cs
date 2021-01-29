@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -31,9 +32,9 @@ namespace Atoll.TransferService.Bundle.Agent
         protected readonly ManualResetEvent SendDone =
             new ManualResetEvent(false);
 
-        public object Cmd<T>(string route, T a, Commands commandId=Commands.Custom) where T: struct 
+        public object Cmd<T>(string route, T contract, Commands commandId=Commands.Custom, Stream data=null) where T: struct 
         {
-            var state = new AgentState(bufferSize, route, commandId, a, fs);
+            var state = new AgentState(bufferSize, route, commandId, contract, data, fs);
             try
             {
                 var ipHostInfo = Dns.GetHostEntry(net);
@@ -53,7 +54,7 @@ namespace Atoll.TransferService.Bundle.Agent
                     return Complete(state);
                 else
                 {
-                    throw new ApplicationException($"Server returned code: {state.Packet.StatusCode}");
+                    throw new ApplicationException($"{state.Packet.StatusCode}");
                 }
             }
             catch (Exception e)

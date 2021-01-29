@@ -34,6 +34,16 @@
         "runtime": {
           "lib/netstandard2.0/Newtonsoft.Json.dll": {}
         }
+      },
+      "TestContract/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/TestContract.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/TestContract.dll": {}
+        }
       }
     }
   },
@@ -211,12 +221,18 @@
         "newtonsoft.json.nuspec",
         "packageIcon.png"
       ]
+    },
+    "TestContract/1.0.0": {
+      "type": "project",
+      "path": "../TestContract/TestContract.csproj",
+      "msbuildProject": "../TestContract/TestContract.csproj"
     }
   },
   "projectFileDependencyGroups": {
     ".NETStandard,Version=v2.0": [
       "NETStandard.Library >= 2.0.3",
-      "Newtonsoft.Json >= 12.0.3"
+      "Newtonsoft.Json >= 12.0.3",
+      "TestContract >= 1.0.0"
     ]
   },
   "packageFolders": {
@@ -249,7 +265,11 @@
       },
       "frameworks": {
         "netstandard2.0": {
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\SoftConsult\\TransferProto\\TestContract\\TestContract.csproj": {
+              "projectPath": "C:\\SoftConsult\\TransferProto\\TestContract\\TestContract.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

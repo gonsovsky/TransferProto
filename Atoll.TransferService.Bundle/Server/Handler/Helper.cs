@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
+using Atoll.TransferService.Bundle.Server.Contract;
 
-namespace Atoll.TransferService.Bundle.Server.Contract.Get
+namespace Atoll.TransferService.Bundle.Server.Handler
 {
     /// <summary>
     /// Статический класс, содержащий метода расширения для <see cref="IHotGetHandlerContext"/>.
     /// </summary>
-    public static class HotGetHandlerContextExtensions
+    public static class Helper
     {
         /// <summary>
         /// Выполнить чтение данных из потока.
@@ -22,6 +23,16 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
             var cnt = stream.Read(frame.Buffer, 0, len);
             frame.DataTransmitted(cnt);
             return ctx.Ok();
+        }
+
+        public static IHotGetHandlerContext WriteToStream(this IHotGetHandlerContext ctx, Stream stream)
+        {
+            var frame = ctx.Frame;
+
+           // stream.Seek(frame.ContentOffset, SeekOrigin.Begin);
+            //stream.Write(frame.Buffer, frame.BufferOffset, frame.Count);
+            return null;
+            //return ctx.Ok();
         }
     }
 }

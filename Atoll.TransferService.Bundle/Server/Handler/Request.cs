@@ -1,12 +1,12 @@
 ﻿using System.Text;
 using Atoll.TransferService.Bundle.Proto;
 
-namespace Atoll.TransferService.Bundle.Server.Contract.Get
+namespace Atoll.TransferService.Bundle.Server.Handler
 {
     /// <summary>
     /// Описатель запроса получения данных.
     /// </summary> 
-    public sealed class HotGetHandlerRequest: State
+    public sealed class Request: State
     {
         /// <summary>
         /// Маршрут запроса.
@@ -47,7 +47,7 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
             throw new System.NotImplementedException();
         }
 
-        public HotGetHandlerRequest(int bufferSize) : base(bufferSize)
+        public Request(int bufferSize) : base(bufferSize)
         {
         }
     }

@@ -3,7 +3,7 @@
 namespace TestContract
 {
     [Serializable]
-    public struct ListContract
+    public struct PutContract
     {
         public string Url;
 

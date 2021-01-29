@@ -26,6 +26,7 @@
       "Atoll.TransferService.Bundle/1.0.0": {
         "dependencies": {
           "Newtonsoft.Json": "12.0.3",
+          "TestContract": "1.0.0",
           "Corallite": "1.0.0.0"
         },
         "runtime": {
