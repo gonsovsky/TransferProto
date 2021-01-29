@@ -5,7 +5,7 @@ namespace Atoll.TransferService.Bundle.Server.Contract
     /// <summary>
     /// Контекст запроса получения данных.
     /// </summary>
-    public interface IHotGetHandlerContext 
+    public interface IContext 
     {
         /// <summary>
         /// Получить описатель запроса.
@@ -21,35 +21,35 @@ namespace Atoll.TransferService.Bundle.Server.Contract
         /// Задать успешный результат обработчика.
         /// </summary>
         /// <returns>экземпляр контекста запроса.</returns>
-        IHotGetHandlerContext Ok();
+        IContext Ok();
 
         /// <summary>
         /// Задать неуспешный результат обработчика, свидетельствующий о некорректном запросе.
         /// </summary>
         /// <param name="message">опциональное сообщение для профилирования.</param>
         /// <returns>экземпляр контекста запроса.</returns>
-        IHotGetHandlerContext BadRequest(string message = null);
+        IContext BadRequest(string message = null);
 
         /// <summary>
         /// Задать неуспешный результат обработчика, свидетельствующий об отсутствии запрошенных данных.
         /// </summary>
         /// <param name="message">опциональное сообщение для профилирования.</param>
         /// <returns>экземпляр контекста запроса.</returns>
-        IHotGetHandlerContext NotFound(string message = null);
+        IContext NotFound(string message = null);
 
         /// <summary>
         /// Задать неуспешный результат обработчика, свидетельствующий об ошибке при обработке запроса.
         /// </summary>
         /// <param name="message">опциональное сообщение для профилирования.</param>
         /// <returns>экземпляр контекста запроса.</returns>
-        IHotGetHandlerContext Error(string message = null);
+        IContext Error(string message = null);
 
         /// <summary>
         /// Задать неуспешный результат обработчика, свидетельствующий о нереализованной логики обработки запроса.
         /// </summary>
         /// <param name="message">опциональное сообщение для профилирования.</param>
         /// <returns>экземпляр контекста запроса.</returns>
-        IHotGetHandlerContext NotImplemented(string message = null);
+        IContext NotImplemented(string message = null);
 
     }
 

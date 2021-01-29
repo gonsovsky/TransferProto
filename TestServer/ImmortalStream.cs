@@ -3,11 +3,11 @@ using System.IO;
 
 namespace TestServer
 {
-    public class NonClosableStreamWrap : Stream
+    public class ImmortalStream : Stream
     {
         private readonly Stream inner;
 
-        public NonClosableStreamWrap(Stream inner)
+        public ImmortalStream(Stream inner)
         {
             this.inner = inner ?? throw new ArgumentNullException(nameof(inner));
         }
@@ -40,6 +40,5 @@ namespace TestServer
             get => this.inner.Position;
             set => this.inner.Position = value;
         }
-
     }
 }

@@ -4,13 +4,13 @@ using Atoll.TransferService.Bundle.Server.Contract;
 using Atoll.TransferService.Bundle.Server.Handler;
 using TestContract;
 
-namespace TestServer
+namespace TestServer.Handlers
 {
-    public class MyHotGetFileHandler : IHandler
+    public class Get : IHandler
     {
         private FileStream fileStream;
 
-        public IHotGetHandlerContext Open(IHotGetHandlerContext ctx)
+        public IContext Open(IContext ctx)
         {
             var request = ctx.Request;
             GetContract contract;
@@ -50,10 +50,10 @@ namespace TestServer
             return ctx.Ok();
         }
 
-        public IHotGetHandlerContext Read(IHotGetHandlerContext ctx) =>
+        public IContext Read(IContext ctx) =>
             ctx.ReadFromStream(this.fileStream);
 
-        public Boolean ReadEnd(IHotGetHandlerContext ctx)
+        public Boolean ReadEnd(IContext ctx)
         {
             return fileStream.Position == fileStream.Length;
         }

@@ -10,6 +10,6 @@
         /// </summary>
         /// <param name="ctx">контекст запроса.</param>
         /// <returns>экземпляр обработчика.</returns>
-        Handler.IHandler Create(IHotGetHandlerContext ctx);
+        IHandler Create(IContext ctx);
     }
 }

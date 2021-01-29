@@ -1,17 +1,15 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 using Atoll.TransferService.Bundle.Server.Contract;
 using Atoll.TransferService.Bundle.Server.Handler;
 
-namespace TestServer
+namespace TestServer.Handlers
 {
-    public class MyHotPutFileHandler : IHandler
+    public class MyHotPutFileHandler : IHandlerPut
     {
-
         private FileStream fileStream;
 
-        public IHotGetHandlerContext Open(IHotGetHandlerContext ctx)
+        public IContext Open(IContext ctx)
         {
         //    var request = ctx.Request;
 
@@ -46,8 +44,8 @@ namespace TestServer
         return ctx.Ok();
         }
 
-        //public IHotGetHandler Write(IHotGetHandlerContext ctx) => { };
-        //  ctx.WriteToStream(this.fileStream);
+        public IContext Write(IContext ctx) =>
+            ctx.WriteToStream(this.fileStream);
 
         public void Dispose()
         {
@@ -56,13 +54,12 @@ namespace TestServer
             this.fileStream = null;
         }
 
-
-        public IHotGetHandlerContext Read(IHotGetHandlerContext ctx)
+        public IContext Read(IContext ctx)
         {
             throw new NotImplementedException();
         }
 
-        public bool ReadEnd(IHotGetHandlerContext ctx)
+        public bool ReadEnd(IContext ctx)
         {
             throw new NotImplementedException();
         }

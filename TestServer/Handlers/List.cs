@@ -4,18 +4,18 @@ using Atoll.TransferService.Bundle.Proto;
 using Atoll.TransferService.Bundle.Server.Contract;
 using Atoll.TransferService.Bundle.Server.Handler;
 
-namespace TestServer
+namespace TestServer.Handlers
 {
     public class MyHotListFilesHandler : IHandler
     {
         private MemoryStream responseStream;
 
-        public IHotGetHandlerContext Open(IHotGetHandlerContext ctx)
+        public IContext Open(IContext ctx)
         {
             this.responseStream = new MemoryStream();
             var fs = new Fs(Atoll.TransferService.Bundle.Proto.Helper.AssemblyDirectory);
             var data =fs.List("").ToJson();
-            using (var wrap = new NonClosableStreamWrap(this.responseStream))
+            using (var wrap = new ImmortalStream(this.responseStream))
             using (var writer = new StreamWriter(wrap, Encoding.UTF8))
             {
                 writer.Write(data);
@@ -25,12 +25,12 @@ namespace TestServer
             return ctx.Ok();
         }
 
-        public IHotGetHandlerContext Read(IHotGetHandlerContext ctx)
+        public IContext Read(IContext ctx)
         {
             return ctx.ReadFromStream(this.responseStream);
         }
 
-        public bool ReadEnd(IHotGetHandlerContext ctx)
+        public bool ReadEnd(IContext ctx)
         {
             return responseStream.Position == responseStream.Length;
         }

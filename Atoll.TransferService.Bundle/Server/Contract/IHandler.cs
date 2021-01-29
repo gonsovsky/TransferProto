@@ -1,7 +1,6 @@
 ﻿using System;
-using Atoll.TransferService.Bundle.Server.Contract;
 
-namespace Atoll.TransferService.Bundle.Server.Handler
+namespace Atoll.TransferService.Bundle.Server.Contract
 {
     /// <summary>
     /// Контракт обработчика запроса получения данных.
@@ -13,15 +12,25 @@ namespace Atoll.TransferService.Bundle.Server.Handler
         /// </summary>
         /// <param name="ctx">контекст запроса.</param>
         /// <returns>контекст запроса.</returns>
-        IHotGetHandlerContext Open(IHotGetHandlerContext ctx);
+        IContext Open(IContext ctx);
 
         /// <summary>
         /// Выполнить итерацию чтения данных.
         /// </summary>
         /// <param name="ctx">контекст запроса.</param>
         /// <returns>контекст запроса.</returns>
-        IHotGetHandlerContext Read(IHotGetHandlerContext ctx);
+        IContext Read(IContext ctx);
 
-        bool ReadEnd(IHotGetHandlerContext ctx);
+        bool ReadEnd(IContext ctx);
+    }
+
+    public interface IHandlerPut : IHandler
+    {
+        /// <summary>
+        /// Выполнить итерацию приема данных.
+        /// </summary>
+        /// <param name="ctx">контекст запроса.</param>
+        /// <returns>контекст запроса.</returns>
+        IContext Write(IContext ctx);
     }
 }

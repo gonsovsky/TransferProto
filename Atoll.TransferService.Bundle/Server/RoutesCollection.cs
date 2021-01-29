@@ -78,7 +78,7 @@ namespace Atoll.TransferService.Bundle.Server
         /// <param name="routesCollection"></param>
         /// <param name="route">маршрут.</param>
         /// <returns>коллекция маршрутов обработки запросов.</returns>
-        public static RoutesCollection RouteGet<THandler>(this RoutesCollection routesCollection, string route) where THandler : Handler.IHandler
+        public static RoutesCollection RouteGet<THandler>(this RoutesCollection routesCollection, string route) where THandler : IHandler
         {
             if (route == null) throw new ArgumentNullException(nameof(route));
             routesCollection.Routes.Add(route, HandlerFactory<THandler>.Instance);
@@ -91,7 +91,7 @@ namespace Atoll.TransferService.Bundle.Server
         /// <param name="routesCollection"></param>
         /// <param name="route">маршрут.</param>
         /// <returns>коллекция маршрутов обработки запросов.</returns>
-        public static RoutesCollection RoutePut<THandler>(this RoutesCollection routesCollection, string route) where THandler : Handler.IHandler
+        public static RoutesCollection RoutePut<THandler>(this RoutesCollection routesCollection, string route) where THandler : IHandler
         {
             if (route == null) throw new ArgumentNullException(nameof(route));
             routesCollection.Routes.Add(route, HandlerFactory<THandler>.Instance);

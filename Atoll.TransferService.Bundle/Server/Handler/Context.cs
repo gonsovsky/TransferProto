@@ -4,7 +4,7 @@ using Atoll.TransferService.Bundle.Server.Contract;
 
 namespace Atoll.TransferService.Bundle.Server.Handler
 {
-    public class Context: IHotGetHandlerContext
+    public class Context: IContext
     {
         public Context(Socket socket, HotServer srv, Config config)
         {
@@ -22,31 +22,31 @@ namespace Atoll.TransferService.Bundle.Server.Handler
 
         public Frame Frame { get; set; }
 
-        public IHotGetHandlerContext Ok()
+        public IContext Ok()
         {
             CallBackStatus = HttpStatusCode.OK;
             return this;
         }
 
-        public IHotGetHandlerContext BadRequest(string message = null)
+        public IContext BadRequest(string message = null)
         {
             CallBackStatus = HttpStatusCode.BadRequest;
             return this;
         }
 
-        public IHotGetHandlerContext NotFound(string message = null)
+        public IContext NotFound(string message = null)
         {
             CallBackStatus = HttpStatusCode.NotFound;
             return this;
         }
 
-        public IHotGetHandlerContext Error(string message = null)
+        public IContext Error(string message = null)
         {
             CallBackStatus = HttpStatusCode.InternalServerError;
             return this;
         }
 
-        public IHotGetHandlerContext NotImplemented(string message = null)
+        public IContext NotImplemented(string message = null)
         {
             CallBackStatus = HttpStatusCode.NotImplemented;
             return this;

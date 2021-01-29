@@ -1,5 +1,6 @@
 ﻿using System;
 using Atoll.TransferService.Bundle.Server;
+using TestServer.Handlers;
 
 namespace TestServer
 {
@@ -8,7 +9,7 @@ namespace TestServer
         private static void Main()
         {
             var routes = new RoutesCollection()
-                            .RouteGet("get", HandlerFactory<MyHotGetFileHandler>.Instance)
+                            .RouteGet("get", HandlerFactory<Get>.Instance)
                             .RouteGet("list",   HandlerFactory<MyHotListFilesHandler>.Instance)
                             .RoutePut("put", PutHandlerFactory<MyHotPutFileHandler>.Instance);
 

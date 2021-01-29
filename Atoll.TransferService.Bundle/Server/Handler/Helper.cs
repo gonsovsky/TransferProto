@@ -5,7 +5,7 @@ using Atoll.TransferService.Bundle.Server.Contract;
 namespace Atoll.TransferService.Bundle.Server.Handler
 {
     /// <summary>
-    /// Статический класс, содержащий метода расширения для <see cref="IHotGetHandlerContext"/>.
+    /// Статический класс, содержащий метода расширения для <see cref="IContext"/>.
     /// </summary>
     public static class Helper
     {
@@ -15,7 +15,7 @@ namespace Atoll.TransferService.Bundle.Server.Handler
         /// <param name="ctx">контекст запроса получения данных.</param>
         /// <param name="stream">поток для чтения данных.</param>
         /// <returns>экземпляр контекста чтения данных.</returns>
-        public static IHotGetHandlerContext ReadFromStream(this IHotGetHandlerContext ctx, Stream stream) 
+        public static IContext ReadFromStream(this IContext ctx, Stream stream) 
         {
             var frame = ctx.Frame;
             stream.Seek(frame.BytesTransmitted, SeekOrigin.Begin);
@@ -25,7 +25,7 @@ namespace Atoll.TransferService.Bundle.Server.Handler
             return ctx.Ok();
         }
 
-        public static IHotGetHandlerContext WriteToStream(this IHotGetHandlerContext ctx, Stream stream)
+        public static IContext WriteToStream(this IContext ctx, Stream stream)
         {
             var frame = ctx.Frame;
 

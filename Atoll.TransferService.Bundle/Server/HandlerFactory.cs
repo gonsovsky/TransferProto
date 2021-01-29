@@ -9,7 +9,7 @@ namespace Atoll.TransferService.Bundle.Server
     /// Реализация фабрики обработчиков запросов получения данных, выполняющей вызов конструктора по-умолчанию.
     /// </summary>
     /// <typeparam name="THandler"></typeparam>
-    public class HandlerFactory<THandler> : IFactory where THandler : Handler.IHandler
+    public class HandlerFactory<THandler> : IFactory where THandler : IHandler
     {
         /// <summary>
         /// Синглетон-экземпляр фабрики.
@@ -65,15 +65,14 @@ namespace Atoll.TransferService.Bundle.Server
         private readonly Func<THandler> factoryMethod;
 
         /// <inheritdoc />
-        Handler.IHandler IFactory.Create(IHotGetHandlerContext ctx) => 
+        IHandler IFactory.Create(IContext ctx) => 
             this.factoryMethod();
     }
 
-    public class PutHandlerFactory<THandler> : HandlerFactory<THandler> where THandler : Handler.IHandler
+    public class PutHandlerFactory<THandler> : HandlerFactory<THandler> where THandler : IHandler
     {
         protected PutHandlerFactory(Func<THandler> factoryMethod) : base(factoryMethod)
         {
         }
     }
-
 }
