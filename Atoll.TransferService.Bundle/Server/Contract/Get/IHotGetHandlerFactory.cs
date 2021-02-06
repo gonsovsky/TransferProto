@@ -1,4 +1,4 @@
-﻿namespace Atoll.TransferService.Bundle.Server.Contract.Get
+﻿namespace Atoll.TransferService
 {
     /// <summary>
     /// Контракт фабрики обработчиков запросов получения данных.

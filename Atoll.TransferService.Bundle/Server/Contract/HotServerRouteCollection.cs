@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Atoll.TransferService.Bundle.Server.Contract.Get;
-using Atoll.TransferService.Bundle.Server.Contract.Put;
 
-namespace Atoll.TransferService.Bundle.Server.Contract
+namespace Atoll.TransferService
 {
     /// <summary>
     /// Коллекция маршрутов обработки запросов.

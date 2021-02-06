@@ -1,6 +1,5 @@
 ﻿using System;
-using Atoll.TransferService.Bundle.Server.Contract;
-using Atoll.TransferService.Bundle.Server.Implementation;
+using Atoll.TransferService;
 
 namespace TestServer
 {
@@ -17,7 +16,10 @@ namespace TestServer
             {
                 server
                     .UseRoutes(routes)
-                    .UseConfig(new HotServerConfiguration { Port = 3000, BufferSize = 1024});
+                    .UseConfig(new HotServerConfiguration
+                    {
+                        Port = 3000, BufferSize = 256, SendDelay = 300, RecvDelay = 300
+                    });
 
                 server.Start();
 

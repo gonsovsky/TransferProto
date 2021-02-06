@@ -146,9 +146,8 @@ namespace TestClient
                 if (bytesRead > 0)
                 {
                     state.DataReceived(bytesRead);
-                    AllDone.Set();
-                    //client.BeginReceive(state.Buffer, 0, state.BufferSize, 0,
-                    //   ReceiveCallback, state);
+                    client.BeginReceive(state.Buffer, 0, state.BufferSize, 0,
+                       ReceiveCallback, state);
                 }
                 else
                 {

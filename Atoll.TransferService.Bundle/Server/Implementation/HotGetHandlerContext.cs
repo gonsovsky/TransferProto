@@ -3,19 +3,19 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Atoll.TransferService.Bundle.Server.Contract;
-using Atoll.TransferService.Bundle.Server.Contract.Get;
 using Corallite.Buffers;
 
-namespace Atoll.TransferService.Bundle.Server.Implementation
+namespace Atoll.TransferService
 {
     public class HotGetHandlerContext: IHotGetHandlerContext, IDisposable
     {
-        public readonly Socket Socket;
+        public Socket Socket;
 
         public readonly HotServerConfiguration Config;
 
         public byte[] Buffer;
+
+        public int BufferOffset;
 
         public readonly int BufferSize;
 
@@ -38,46 +38,70 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             if (Buffer != null)
                 UniArrayPool<byte>.Shared.Return(this.Buffer);
             Buffer = null;
+            Handler?.Dispose();
+            Handler = null;
             Request?.Dispose();
             Request = null;
             Frame?.Dispose();
             Frame = null;
+            Socket?.Shutdown(SocketShutdown.Both);
+            Socket?.Close();
+            Socket = null;
         }
 
         public bool DataReceived(int cnt)
         {
+            BufferOffset += cnt;
             if (this.Request != null)
                 return true;
 
-            if (cnt < 8) //TODO: я не знаю, как это решить не имея некой структуры ответственной за "конверт" с данными
-                return false;
-
-            using (var reader = new BinaryReader(new MemoryStream(Buffer)))
+            try
             {
-                var routeLen = reader.ReadInt32();
-                var routeData = reader.ReadBytes(routeLen);
-                var bodyLen = reader.ReadInt32();
-                var bodyData = reader.ReadBytes(bodyLen);
-                Request = new HotGetHandlerRequest(routeData.MakeString(routeLen), bodyData, bodyLen);
-                Frame = new HotGetHandlerFrame(this);
-                Frame.ContentOffset = reader.ReadInt64();
-                Frame.Count = (int)reader.ReadInt64();
+                using (var reader = new BinaryReader(new MemoryStream(Buffer)))
+                {
+                    var routeLen = reader.ReadInt32();
+                    var routeData = reader.ReadBytes(routeLen);
+                    var bodyLen = reader.ReadInt32();
+                    var bodyData = reader.ReadBytes(bodyLen);
+                    Request = new HotGetHandlerRequest(routeData.MakeString(routeLen), bodyData, bodyLen);
+                    Frame = new HotGetHandlerFrame(this)
+                    {
+                        ContentOffset = reader.ReadInt64(),
+                        ContentLength = (int)reader.ReadInt64()
+                    };
+                }
+
+                return true;
             }
-            return true;
+            catch (EndOfStreamException) //минимум данных пока не добрался
+            {
+                return false;
+            }
         }
+
+        private bool headSent;
 
         public bool DataSent()
         {
-            using (var ms = new MemoryStream(Frame.Buffer, true))
+            if (!headSent)
             {
-                using (var writer = new BinaryWriter(ms))
+                headSent = true;
+                using (var ms = new MemoryStream(Frame.Buffer, true))
                 {
-                    writer.Write((int)ResponseStatus);
-                    writer.Write((int)ResponseMessage.Length);
-                    writer.Write(Encoding.UTF8.GetBytes(ResponseMessage));
+                    using (var writer = new BinaryWriter(ms))
+                    {
+                        writer.Write((int) ResponseStatus);
+                        writer.Write((int) ResponseMessage.Length);
+                        writer.Write(Encoding.UTF8.GetBytes(ResponseMessage));
+                    }
                 }
+                Frame.BytesRead = 8 + ResponseMessage.Length;
+                return true;
             }
-            Frame.Count = 8 + ResponseMessage.Length;
+            if (Frame.BytesRead == 0) //раз в прошлый раз прочитали 0 из Handler'a- значит EOF
+                return false;
+            Frame.Count = BufferSize;
+            this.Handler.Read(this);
             return true;
         }
 

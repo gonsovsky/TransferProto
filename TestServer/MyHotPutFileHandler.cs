@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
-using Atoll.TransferService.Bundle.Server.Contract.Put;
+using Atoll.TransferService;
 
 namespace TestServer
 {

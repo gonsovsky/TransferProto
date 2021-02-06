@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using Atoll.TransferService.Bundle.Server.Contract.Put;
 
-namespace Atoll.TransferService.Bundle.Server.Contract
+namespace Atoll.TransferService
 {
     /// <summary>
     /// Реализация фабрики обработчиков запросов отправки данных, выполняющей вызов конструктора по-умолчанию.

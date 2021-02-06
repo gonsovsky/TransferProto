@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Threading;
-using Atoll.TransferService.Bundle.Server.Contract;
-using Atoll.TransferService.Bundle.Server.Contract.Get;
+using System.Threading.Tasks;
 
-namespace Atoll.TransferService.Bundle.Server.Implementation
+namespace Atoll.TransferService
 {
     /// <summary>
     /// Реализация сервера приема и передачи данных.
@@ -53,7 +53,7 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             var ctx = new HotGetHandlerContext(sock,  config);
             sock.BeginReceive(ctx.Buffer, 0, ctx.BufferSize, 0,
                 ReadCallback, ctx);
-            Console.WriteLine($"Client connected: {sock.RemoteEndPoint.AddressFamily}");
+            Console.WriteLine($"Client connected");
         }
 
         public void ReadCallback(IAsyncResult ar)
@@ -64,22 +64,51 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
                 return;
             if (ctx.DataReceived(bytesRead))
             {
-                if (ctx.Handler == null)
+                if (ctx.Handler != null)
+                    return;
+                if (routesCollection.GetRoutes.TryGetValue(ctx.Request.Route, out var factory))
                 {
-                    if (routesCollection.GetRoutes.TryGetValue(ctx.Request.Route, out var factory))
-                    {
-                        ctx.Handler = factory.Create(ctx);
-                        ctx.Handler.Open(ctx);
-                    }
-                    if (ctx.DataSent())
-                        ctx.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.Count, 0,
-                            SendCallback, ctx);
+                    ctx.Handler = factory.Create(ctx);
+                    ctx.Handler.Open(ctx);
                 }
+                if (ctx.DataSent())
+                    Send(ctx);
             }
+            else
+            {
+                Recv(ctx);
+            }
+        }
 
-            //ctx.Socket.BeginReceive(ctx.Buffer, ctx.Request.BytesTransmitted,
-            //        ctx.BufferSize - ctx.Request.BytesTransmitted, 0,
-            //        ReadCallback, ctx);
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Recv(HotGetHandlerContext ctx, bool now = false)
+        {
+            if (now)
+            {
+                ctx.Socket.BeginReceive(ctx.Buffer, ctx.BufferOffset,
+                    ctx.BufferSize - ctx.BufferOffset, 0,
+                    ReadCallback, ctx);
+                return;
+            }
+            if (config.RecvDelay == 0)
+                Recv(ctx, true);
+            else
+                Task.Delay(config.RecvDelay).ContinueWith(a => Recv(ctx, true));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void Send(HotGetHandlerContext ctx, bool now = false)
+        {
+            if (now)
+            {
+                ctx.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BytesRead, 0,
+                        SendCallback, ctx);
+                return;
+            }
+            if (config.SendDelay == 0)
+                Send(ctx, true);
+            else
+                Task.Delay(config.SendDelay).ContinueWith(a => Send(ctx, true));
         }
 
         void SendCallback(IAsyncResult ar)
@@ -88,30 +117,20 @@ namespace Atoll.TransferService.Bundle.Server.Implementation
             ctx.Socket.EndSend(ar);
             if (ctx.ResponseStatus != HttpStatusCode.OK)
             {
+                Console.WriteLine($"Client disconnected");
                 ctx.Dispose();
+                allDone.Set();
                 return;
             }
-            //if (ctx.Handler.DataSent(ctx))
-            //{
-            //    Complete(ctx.Frame, ctx);
-            //    ctx.Ok();
-            //}
-            //else
-            //{
-            //    if (ctx.Request.Packet.CommandId == Commands.Put)
-            //    {
-            //        ctx.Frame.Socket.BeginReceive(ctx.Frame.Buffer, 0, ctx.Frame.BufferSize, 0,
-            //            ReadCallback2, ctx);
-            //    }
-            //    else
-            //    {
-            //        ctx.Handler.Read(ctx);
-            //        ctx.Frame.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BufferLen, 0,
-            //            SendCallback, ctx);
-            //    }
-            //}
+            if (ctx.DataSent())
+                Send(ctx);
+            else
+            {
+                Console.WriteLine($"Client disconnected");
+                ctx.Dispose();
+                allDone.Set();
+            }
         }
-
 
         public HotServer UseConfig(HotServerConfiguration aCfg)
         {

@@ -1,4 +1,4 @@
-﻿namespace Atoll.TransferService.Bundle.Server.Contract.Get
+﻿namespace Atoll.TransferService
 {
     /// <summary>
     /// Контекст запроса получения данных.

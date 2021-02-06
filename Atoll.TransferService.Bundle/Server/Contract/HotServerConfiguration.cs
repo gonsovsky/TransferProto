@@ -1,4 +1,4 @@
-﻿namespace Atoll.TransferService.Bundle.Server.Contract
+﻿namespace Atoll.TransferService
 {
     /// <summary>
     /// Описатель конфигурации сервера.
@@ -11,5 +11,9 @@
         public int Port;
 
         public int BufferSize;
+
+        public int SendDelay;
+
+        public int RecvDelay;
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System;
-using Atoll.TransferService.Bundle.Server.Implementation;
 using Corallite.Buffers;
 
-namespace Atoll.TransferService.Bundle.Server.Contract.Get
+namespace Atoll.TransferService
 {
     /// <summary>
     /// Описатель кадра ответа на запрос получения данных.
@@ -25,6 +24,11 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         public long ContentOffset;
 
         /// <summary>
+        /// Кол-во содержимого для отправки <see cref="Buffer"/>.
+        /// </summary>
+        public long ContentLength;
+
+        /// <summary>
         /// Количество данных для заполнения буфера <see cref="Buffer"/>.
         /// </summary>
         public int Count;
@@ -33,6 +37,11 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         /// Количество заполненных байт по результатам итерации чтения.
         /// </summary>
         public int BytesRead;
+
+        /// <summary>
+        /// Общее Количество отправленных байт сегмента.
+        /// </summary>
+        public int TotalRead;
 
         private readonly HotGetHandlerContext ctx;
 

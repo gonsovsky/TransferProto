@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RootNamespace>Atoll.TransferService</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

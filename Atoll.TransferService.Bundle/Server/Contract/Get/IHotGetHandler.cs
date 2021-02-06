@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Atoll.TransferService.Bundle.Server.Contract.Get
+namespace Atoll.TransferService
 {
     /// <summary>
     /// Контракт обработчика запроса получения данных.

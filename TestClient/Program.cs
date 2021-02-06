@@ -7,7 +7,7 @@ namespace TestClient
         private static void Main()
         {
             var fs = new Fs(Helper.AssemblyDirectory);
-            var agent = new Agent(3000, "localhost", 1024, fs)
+            var agent = new Agent(3000, "localhost", 256, fs)
             {
                 OnRequest = (party, state) =>
                 {
@@ -16,9 +16,9 @@ namespace TestClient
                 },
                 OnResponse = (party, state) =>
                 {
-                    //if (state.Packet.CommandId == (byte)Commands.List)
-                    //    Console.WriteLine($"\r\n{state.Result<FsInfo[]>().ToJson()}");
-                    //else
+                    if (state.SendPacket.Route == "list")
+                        Console.WriteLine($"\r\n{state.StringResult}");
+                    else
                         Console.WriteLine(
                             $@"Agent Response {state.SendPacket.Route}:  {state.SendPacket.Url()} - {state.StatusCode}");
                 },
@@ -28,30 +28,16 @@ namespace TestClient
                 }
             };
 
-            //var up = new PutContract()
-            //{
-            //    Url = "456.txt",
-            //    Offset = 0,
-            //    Length = new FileInfo("456.txt").Length
-            //};
-            //agent.Cmd("put", up, Commands.Put,
-            //    new FileStream(
-            //        "456.txt", FileMode.Open, FileAccess.Read, FileShare.Read)
-            //);
 
-            //Console.WriteLine("Put ready");
+            agent.Cmd("download", "abc.txt", 0, 500000);
 
+            agent.Cmd("download", "../../../../../../pagefile.sys", 0, 500000);
 
-            var result = agent.Cmd("download", "123.txt", 0,500000);
+            agent.Cmd("download", "123.txt", 0, 500000);
 
-            //t.Url = "abc.txt";
-            //agent.Cmd("get", t, Commands.Get);
-            //t.Url = "../../../../../../pagefile.sys";
-            //agent.Cmd("get", t, Commands.Get);
+            agent.Cmd("list", "/", 0,0);
 
-            //agent.Cmd("list", new ListContract() {Url = "/"}, Commands.List);
-
-            Console.WriteLine("enter");
+            Console.WriteLine("enter to close");
             Console.ReadLine();
         }
     }

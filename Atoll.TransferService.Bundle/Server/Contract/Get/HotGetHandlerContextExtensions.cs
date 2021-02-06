@@ -1,7 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 
-namespace Atoll.TransferService.Bundle.Server.Contract.Get
+namespace Atoll.TransferService
 {
     /// <summary>
     /// Статический класс, содержащий метода расширения для <see cref="IHotGetHandlerContext"/>.
@@ -17,23 +18,14 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         public static IHotGetHandlerContext ReadFromStream(this IHotGetHandlerContext ctx, Stream stream) 
         {
             var frame = ctx.Frame;
-            
-            stream.Seek(frame.ContentOffset, SeekOrigin.Begin);
-
-            var buffer = frame.Buffer;
-            var offset = frame.BufferOffset;
-            var toRead = frame.Count;
-
-            while (toRead > 0)
-            {
-                var read = stream.Read(buffer, offset, toRead);
-                if (read < 1) break;
-
-                offset += read;
-                toRead -= read;
-            }
-
-            frame.BytesRead = frame.Count - toRead;
+            stream.Seek(frame.ContentOffset + frame.TotalRead, SeekOrigin.Begin);
+            var len = frame.ContentLength;
+            if (frame.ContentLength == 0)
+                len = stream.Length - stream.Position;
+            var total = (int)Math.Min(frame.Count, Math.Min(len, stream.Length - stream.Position));
+            var read = stream.Read(frame.Buffer, frame.BufferOffset, total);
+            frame.BytesRead = read;
+            frame.TotalRead += read;
             return ctx.Ok();
         }
 
@@ -41,6 +33,5 @@ namespace Atoll.TransferService.Bundle.Server.Contract.Get
         {
             return Encoding.UTF8.GetString(data, 0, len);
         }
-      
     }
 }

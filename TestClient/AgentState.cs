@@ -91,19 +91,6 @@ namespace TestClient
             return true;
         }
 
-        public bool SendDataX()
-        {
-            if (SendPacket.Route != "upload")
-                return false;
-            var len = (int)Math.Min(BufferSize, (SendData.Length - SendData.Position));
-            var cnt = SendData.Read(Buffer, 0, len);
-            bytesSent += 1;
-            BufferLen = cnt;
-            return true;
-        }
-
-        private int bytesSent; 
-
         public bool HasSend()
         {
             if (HeadSent == false)
@@ -133,5 +120,17 @@ namespace TestClient
         public string FileName => Path.Combine(Helper.AssemblyDirectory, Url);
 
         public HttpStatusCode StatusCode => RecvPacket.StatusCode;
+
+        public string StringResult
+        {
+            get
+            {
+                RecvStream.Position = 0;
+                using (StreamReader sr = new StreamReader(RecvStream))
+                {
+                    return sr.ReadToEnd();
+                }
+            }
+        }
     }
 }
