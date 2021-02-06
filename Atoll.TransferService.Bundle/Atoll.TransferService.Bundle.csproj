@@ -6,14 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\TestContract\TestContract.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="Corallite">
       <HintPath>..\Lib\netstandard2.0\Corallite.dll</HintPath>
     </Reference>

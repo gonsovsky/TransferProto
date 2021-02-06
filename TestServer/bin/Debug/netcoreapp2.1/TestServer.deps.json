@@ -1,41 +1,25 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.1",
-    "signature": "5c8ba217fe1d4c7004dddaea3eac7af88348b72a"
+    "signature": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
   },
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v2.1": {
       "TestServer/1.0.0": {
         "dependencies": {
-          "Atoll.TransferService.Bundle": "1.0.0",
-          "TestContract": "1.0.0"
+          "Atoll.TransferService.Bundle": "1.0.0"
         },
         "runtime": {
           "TestServer.dll": {}
         }
       },
-      "Newtonsoft.Json/12.0.3": {
-        "runtime": {
-          "lib/netstandard2.0/Newtonsoft.Json.dll": {
-            "assemblyVersion": "12.0.0.0",
-            "fileVersion": "12.0.3.23909"
-          }
-        }
-      },
       "Atoll.TransferService.Bundle/1.0.0": {
         "dependencies": {
-          "Newtonsoft.Json": "12.0.3",
-          "TestContract": "1.0.0",
           "Corallite": "1.0.0.0"
         },
         "runtime": {
           "Atoll.TransferService.Bundle.dll": {}
-        }
-      },
-      "TestContract/1.0.0": {
-        "runtime": {
-          "TestContract.dll": {}
         }
       },
       "Corallite.Reference/1.0.0.0": {
@@ -54,19 +38,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Newtonsoft.Json/12.0.3": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-6mgjfnRB4jKMlzHSl+VD+oUc1IebOZabkbyWj2RiTgWwYPPuaK1H97G1sHqGwPlS5npiF5Q0OrxN1wni2n5QWg==",
-      "path": "newtonsoft.json/12.0.3",
-      "hashPath": "newtonsoft.json.12.0.3.nupkg.sha512"
-    },
     "Atoll.TransferService.Bundle/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "TestContract/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

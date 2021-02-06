@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Atoll.TransferService.Bundle\Atoll.TransferService.Bundle.csproj" />
-    <ProjectReference Include="..\TestContract\TestContract.csproj" />
   </ItemGroup>
 
 </Project>

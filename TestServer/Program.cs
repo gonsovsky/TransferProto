@@ -1,6 +1,6 @@
 ﻿using System;
-using Atoll.TransferService.Bundle.Server;
-using TestServer.Handlers;
+using Atoll.TransferService.Bundle.Server.Contract;
+using Atoll.TransferService.Bundle.Server.Implementation;
 
 namespace TestServer
 {
@@ -8,26 +8,23 @@ namespace TestServer
     {
         private static void Main()
         {
-            var routes = new RoutesCollection()
-                            .RouteGet("get", HandlerFactory<Get>.Instance)
-                            .RouteGet("list",   HandlerFactory<MyHotListFilesHandler>.Instance)
-                            .RoutePut("put", PutHandlerFactory<MyHotPutFileHandler>.Instance);
+            var routes = new HotServerRouteCollection()
+                .RouteGet<MyHotGetFileHandler>("download")
+                .RouteGet<MyHotListFilesHandler>("list")
+                .RoutePut<MyHotPutFileHandler>("upload");
 
-            var server = new HotServer()
-            {
-                OnRequest = (party, state) => 
-                    Console.WriteLine($"Server Request  {state.Packet.CommandId}: {state.Url}"),
-                OnResponse = (party, state) => 
-                    Console.WriteLine($"Server Response {state.Packet.CommandId}: {state.StatusCode}"),
-                OnAbort = (party, state, ex) => 
-                    Console.WriteLine($"Server Abort    {state.Packet.CommandId}: {ex?.Message}")
-            };
+            using (var server = new HotServer())
             {
                 server
                     .UseRoutes(routes)
-                    .UseConfig(new Config { Port = 3000 });
+                    .UseConfig(new HotServerConfiguration { Port = 3000, BufferSize = 1024});
 
                 server.Start();
+
+                Console.WriteLine("Server started. Press 'Enter' to stop.");
+                Console.ReadLine();
+
+                server.Stop();
             }
         }
     }

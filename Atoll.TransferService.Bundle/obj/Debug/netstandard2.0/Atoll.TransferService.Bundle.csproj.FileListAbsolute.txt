@@ -2,12 +2,10 @@ C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\bin\Debug\netstandard2
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\bin\Debug\netstandard2.0\Atoll.TransferService.Bundle.dll
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\bin\Debug\netstandard2.0\Atoll.TransferService.Bundle.pdb
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\bin\Debug\netstandard2.0\Corallite.dll
-C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\bin\Debug\netstandard2.0\TestContract.dll
-C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\bin\Debug\netstandard2.0\TestContract.pdb
-C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.csprojAssemblyReference.cache
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.csproj.CoreCompileInputs.cache
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.AssemblyInfoInputs.cache
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.AssemblyInfo.cs
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.csproj.CopyComplete
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.dll
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.pdb
+C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.csprojAssemblyReference.cache
