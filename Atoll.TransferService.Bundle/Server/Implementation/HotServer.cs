@@ -50,38 +50,54 @@ namespace Atoll.TransferService
             allDone.Set();
             var client = (Socket)ar.AsyncState;
             var sock = client.EndAccept(ar);
-            var ctx = new HotGetHandlerContext(sock,  config);
-            sock.BeginReceive(ctx.Buffer, 0, ctx.BufferSize, 0,
-                ReadCallback, ctx);
+            var ctxAccept = new HotContext(sock,  config);
+            sock.BeginReceive(ctxAccept.Buffer, 0, ctxAccept.BufferSize, 0,
+                ReadCallback, ctxAccept);
             Console.WriteLine($"Client connected");
         }
 
         public void ReadCallback(IAsyncResult ar)
         {
-            var ctx = (HotGetHandlerContext) ar.AsyncState;
-            var bytesRead = ctx.Socket.EndReceive(ar);
+            var ctxAccept = (HotContext) ar.AsyncState;
+            var bytesRead = ctxAccept.Socket.EndReceive(ar);
             if (bytesRead <= 0)
                 return;
-            if (ctx.DataReceived(bytesRead))
+            if (ctxAccept.DataReceived(bytesRead))
             {
-                if (ctx.Handler != null)
-                    return;
-                if (routesCollection.GetRoutes.TryGetValue(ctx.Request.Route, out var factory))
+                switch (ctxAccept.Accept.Route)
                 {
-                    ctx.Handler = factory.Create(ctx);
-                    ctx.Handler.Open(ctx);
+                    case "download":
+                    case "list":
+                        var ctx = new HotGetHandlerContext(ctxAccept);
+                        if (routesCollection.GetRoutes.TryGetValue(ctxAccept.Accept.Route, out var factory))
+                        {
+                            ctx.Handler = factory.Create(ctx);
+                            ctx.Handler.Open(ctx);
+                        }
+                        if (ctx.DataSent())
+                            Send(ctx);
+                        break;
+                    case "upload":
+                        var ctxUp = new HotPutHandlerContext(ctxAccept);
+                        if (routesCollection.PutRoutes.TryGetValue(ctxAccept.Accept.Route, out var factoryUp))
+                        {
+                            ctxUp.Handler = factoryUp.Create(ctxUp);
+                            ctxUp.Handler.Open(ctxUp);
+                        }
+                        if (ctxUp.DataSent())
+                            Send(ctxUp);
+                        break;
                 }
-                if (ctx.DataSent())
-                    Send(ctx);
+                ctxAccept.Dispose();
             }
             else
             {
-                Recv(ctx);
+                Recv(ctxAccept);
             }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Recv(HotGetHandlerContext ctx, bool now = false)
+        private void Recv(HotContext ctx, bool now = false)
         {
             if (now)
             {
@@ -97,11 +113,11 @@ namespace Atoll.TransferService
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Send(HotGetHandlerContext ctx, bool now = false)
+        private void Send(HotContext ctx, bool now = false)
         {
             if (now)
             {
-                ctx.Socket.BeginSend(ctx.Frame.Buffer, 0, ctx.Frame.BytesRead, 0,
+                ctx.Socket.BeginSend(ctx.SendData, 0, ctx.SendBytes, 0,
                         SendCallback, ctx);
                 return;
             }
@@ -113,7 +129,7 @@ namespace Atoll.TransferService
 
         void SendCallback(IAsyncResult ar)
         {
-            var ctx = (HotGetHandlerContext)ar.AsyncState;
+            var ctx = (HotContext)ar.AsyncState;
             ctx.Socket.EndSend(ar);
             if (ctx.ResponseStatus != HttpStatusCode.OK)
             {

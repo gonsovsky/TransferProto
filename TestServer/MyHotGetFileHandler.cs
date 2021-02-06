@@ -7,7 +7,6 @@ namespace TestServer
 {
     public class MyHotGetFileHandler : IHotGetHandler
     {
-
         private FileStream fileStream;
 
         public IHotGetHandlerContext Open(IHotGetHandlerContext ctx)

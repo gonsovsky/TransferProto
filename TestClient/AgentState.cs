@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Dynamic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -24,11 +25,14 @@ namespace TestClient
 
         public bool HeadSent;
 
-        public AgentState(int bufferSize, string route, string url, long offset, long length, Stream data, IFs fs)
+        public string file;
+
+        public AgentState(int bufferSize, string route, string url, long offset, long length, string file, Stream data, IFs fs)
         {
             this.fs =fs;
             this.SendData = data;
             this.Buffer = UniArrayPool<byte>.Shared.Rent(bufferSize);
+            this.file = file;
             SendPacket = new SendPacket()
             {
                 Route = route,
@@ -117,7 +121,15 @@ namespace TestClient
 
         public string Url => SendPacket.Url();
 
-        public string FileName => Path.Combine(Helper.AssemblyDirectory, Url);
+        public string FileName 
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(file))
+                    return Path.Combine(Helper.AssemblyDirectory, Url);
+                return Path.Combine(Helper.AssemblyDirectory, file);
+            }
+        }
 
         public HttpStatusCode StatusCode => RecvPacket.StatusCode;
 

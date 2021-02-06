@@ -22,5 +22,20 @@ namespace TestClient
         {
             return Encoding.UTF8.GetString(packet.BodyData, 0, packet.BodyLen);
         }
+
+        public static void Combine(string inputDirectoryPath, string[] inputFilePaths, string outputFilePath)
+        {
+            using (var outputStream = File.Create(outputFilePath))
+            {
+                foreach (var inputFilePath in inputFilePaths)
+                {
+                    using (var inputStream = File.OpenRead(inputFilePath))
+                    {
+                        inputStream.CopyTo(outputStream);
+                    }
+                }
+            }
+        }
+
     }
 }

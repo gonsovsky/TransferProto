@@ -1,10 +1,12 @@
-﻿namespace Atoll.TransferService
+﻿using System;
+
+namespace Atoll.TransferService
 {
 
     /// <summary>
     /// Описатель запроса отправки данных.
     /// </summary>
-    public sealed class HotPutHandlerRequest 
+    public sealed class HotPutHandlerRequest: IDisposable
     {
 
         /// <summary>
@@ -35,6 +37,8 @@
             this.DataLength = dataLength;
         }
 
+        public void Dispose()
+        {
+        }
     }
-
 }

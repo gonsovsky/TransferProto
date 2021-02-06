@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Enumeration;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -45,12 +46,12 @@ namespace TestClient
         protected readonly ManualResetEvent AllDone =
             new ManualResetEvent(false);
 
-        public object Cmd(string route, string url, long offset, long length, Stream data=null)
+        public object Cmd(string route, string url, long offset, long length, string file="", Stream data=null)
         {
             ConnectDone.Reset();
             SendDone.Reset();
             AllDone.Reset();
-            var state = new AgentState(bufferSize, route, url, offset, length, data, fs);
+            var state = new AgentState(bufferSize, route, url, offset, length, file, data, fs);
             try
             {
                 var ipHostInfo = Dns.GetHostEntry(net);

@@ -15,9 +15,14 @@ namespace Atoll.TransferService
         /// <param name="ctx">контекст запроса получения данных.</param>
         /// <param name="stream">поток для чтения данных.</param>
         /// <returns>экземпляр контекста чтения данных.</returns>
-        public static IHotGetHandlerContext ReadFromStream(this IHotGetHandlerContext ctx, Stream stream) 
+        public static IHotGetHandlerContext ReadFromStream(this IHotGetHandlerContext ctx, Stream stream)
         {
             var frame = ctx.Frame;
+            if (frame.ContentLength != 0 && frame.TotalRead >= frame.ContentLength)
+            {
+                frame.BytesRead = 0;
+                return ctx.Ok();
+            }
             stream.Seek(frame.ContentOffset + frame.TotalRead, SeekOrigin.Begin);
             var len = frame.ContentLength;
             if (frame.ContentLength == 0)

@@ -7,7 +7,6 @@ namespace TestServer
 {
     public class MyHotPutFileHandler : IHotPutHandler
     {
-
         private FileStream fileStream;
 
         public IHotPutHandlerContext Open(IHotPutHandlerContext ctx)
