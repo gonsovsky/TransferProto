@@ -2,6 +2,7 @@
 using System.IO;
 using System.Text;
 
+// ReSharper disable once CheckNamespace
 namespace Atoll.TransferService
 {
     /// <summary>

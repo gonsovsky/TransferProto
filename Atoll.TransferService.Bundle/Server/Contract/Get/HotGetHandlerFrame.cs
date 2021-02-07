@@ -1,6 +1,7 @@
 ﻿using System;
 using Corallite.Buffers;
 
+// ReSharper disable once CheckNamespace
 namespace Atoll.TransferService
 {
     /// <summary>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Dynamic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -27,19 +26,25 @@ namespace TestClient
 
         public string file;
 
-        public AgentState(int bufferSize, string route, string url, long offset, long length, string file, Stream data, IFs fs)
+        public AgentState(int bufferSize, string route, Contract a, Stream data, IFs fs)
         {
             this.fs =fs;
             this.SendData = data;
             this.Buffer = UniArrayPool<byte>.Shared.Rent(bufferSize);
-            this.file = file;
+
             SendPacket = new SendPacket()
             {
                 Route = route,
-                Body = url,
-                Offset = offset,
-                Length = length
+                Body = a.Url,
+                Offset = a.Offset,
+                Length = a.Length
             };
+            if (data != null)
+            {
+                SendPacket.Length = data.Length - SendPacket.Offset;
+            }
+            this.SendData = data;
+            this.file = a.File;
             this.BufferSize = bufferSize;
         }
 
@@ -81,19 +86,24 @@ namespace TestClient
 
         public bool Send()
         {
-            if (HeadSent)
+            if (!HeadSent)
+            {
+                HeadSent = true;
+                SendPacket.ToByteArray(ref Buffer);
+                BufferLen = SendPacket.MySize;
+                return true;
+            }
+            if (!HasSend())
                 return false;
-            HeadSent = true;
-            SendPacket.ToByteArray(ref Buffer);
-            BufferLen = SendPacket.MySize;
-
-            //SendData.Seek(bytesSent, SeekOrigin.Begin);
-            //var len = (int)Math.Min(BufferSize, (SendData.Length - SendData.Position));
-            //var cnt = SendData.Read(Buffer, 0, len);
-            //bytesSent += 1;
-            //BufferLen = cnt;
+            SendData.Seek(bytesSent, SeekOrigin.Begin);
+            var len = (int)Math.Min(BufferSize, (SendData.Length - SendData.Position));
+            var cnt = SendData.Read(Buffer, 0, len);
+            bytesSent += cnt;
+            BufferLen = cnt;
             return true;
         }
+
+        private int bytesSent;
 
         public bool HasSend()
         {
@@ -103,7 +113,7 @@ namespace TestClient
                 return false;
             if (SendPacket.Route != "upload"|| SendData == null)
                 return false;
-            return SendData.Position < SendData.Length-1;
+            return SendData.Position >= SendData.Length;
         }
 
         private readonly IFs fs;
@@ -117,6 +127,9 @@ namespace TestClient
             if (Buffer != null)
                 UniArrayPool<byte>.Shared.Return(this.Buffer);
             Buffer = null;
+            this.Socket?.Shutdown(SocketShutdown.Both);
+            this.Socket?.Close();
+            this.Socket = null;
         }
 
         public string Url => SendPacket.Url();

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Enumeration;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -43,15 +42,15 @@ namespace TestClient
         protected readonly ManualResetEvent SendDone =
             new ManualResetEvent(false);
 
-        protected readonly ManualResetEvent AllDone =
+        protected readonly ManualResetEvent ReceiveDone =
             new ManualResetEvent(false);
 
-        public object Cmd(string route, string url, long offset, long length, string file="", Stream data=null)
+        public object Cmd<T>(string route, T contract, Stream data=null) where T: Contract
         {
             ConnectDone.Reset();
             SendDone.Reset();
-            AllDone.Reset();
-            var state = new AgentState(bufferSize, route, url, offset, length, file, data, fs);
+            ReceiveDone.Reset();
+            var state = new AgentState(bufferSize, route, contract, data, fs);
             try
             {
                 var ipHostInfo = Dns.GetHostEntry(net);
@@ -64,8 +63,9 @@ namespace TestClient
                 client.BeginConnect(remoteEp, ConnectCallback, state);
                 ConnectDone.WaitOne();
                 Send(state);
+                SendDone.WaitOne();
                 Receive(state);
-                AllDone.WaitOne();
+                ReceiveDone.WaitOne();
                 if (state.RecvPacket.StatusCode == HttpStatusCode.OK)
                     return Complete(state);
                 else
@@ -147,12 +147,25 @@ namespace TestClient
                 if (bytesRead > 0)
                 {
                     state.DataReceived(bytesRead);
-                    client.BeginReceive(state.Buffer, 0, state.BufferSize, 0,
-                       ReceiveCallback, state);
+                    if (state.RecvPacket != null && state.RecvPacket.StatusCode != HttpStatusCode.OK)
+                    {
+                        ReceiveDone.Set();
+                        return;
+                    }
+
+                    if (state.SendPacket.Route != "upload")
+                    {
+                        client.BeginReceive(state.Buffer, 0, state.BufferSize, 0,
+                            ReceiveCallback, state);
+                    }
+                    else
+                    {
+                        ReceiveDone.Set();
+                    }
                 }
                 else
                 {
-                    AllDone.Set();
+                    ReceiveDone.Set();
                 }
             }
             catch (Exception e)
@@ -166,7 +179,7 @@ namespace TestClient
             state?.Dispose();
             ConnectDone.Set();
             SendDone.Set();
-            AllDone.Set();
+            ReceiveDone.Set();
             OnAbort?.Invoke(this, state, e);
         }
 
@@ -176,7 +189,7 @@ namespace TestClient
             state?.Dispose();
             ConnectDone.Set();
             SendDone.Set();
-            AllDone.Set();
+            ReceiveDone.Set();
             return null;
         }
     }

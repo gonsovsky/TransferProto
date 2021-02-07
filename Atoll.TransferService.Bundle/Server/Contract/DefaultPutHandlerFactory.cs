@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
+// ReSharper disable once CheckNamespace
 namespace Atoll.TransferService
 {
     /// <summary>

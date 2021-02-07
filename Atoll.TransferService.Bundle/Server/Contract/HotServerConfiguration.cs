@@ -1,4 +1,5 @@
-﻿namespace Atoll.TransferService
+﻿// ReSharper disable once CheckNamespace
+namespace Atoll.TransferService
 {
     /// <summary>
     /// Описатель конфигурации сервера.
@@ -12,8 +13,6 @@
 
         public int BufferSize;
 
-        public int SendDelay;
-
-        public int RecvDelay;
+        public int Delay;
     }
 }

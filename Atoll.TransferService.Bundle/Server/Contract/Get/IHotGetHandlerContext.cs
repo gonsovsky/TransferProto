@@ -1,4 +1,5 @@
-﻿namespace Atoll.TransferService
+﻿// ReSharper disable once CheckNamespace
+namespace Atoll.TransferService
 {
     /// <summary>
     /// Контекст запроса получения данных.

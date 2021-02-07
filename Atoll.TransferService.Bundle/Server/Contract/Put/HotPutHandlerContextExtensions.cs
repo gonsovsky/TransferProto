@@ -1,14 +1,14 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
+// ReSharper disable once CheckNamespace
 namespace Atoll.TransferService
 {
-
     /// <summary>
     /// Статический класс, содержащий метода расширения для <see cref="IHotPutHandlerContext"/>.
     /// </summary>
     public static class HotPutHandlerContextExtensions
     {
-
         /// <summary>
         /// Выполнить чтение данных из потока.
         /// </summary>
@@ -19,9 +19,11 @@ namespace Atoll.TransferService
         {
             var frame = ctx.Frame;
             
-            stream.Seek(frame.ContentOffset, SeekOrigin.Begin);
-            stream.Write(frame.Buffer, frame.BufferOffset, frame.Count);
-
+            stream.Seek(frame.ContentOffset + frame.TotalWrite, SeekOrigin.Begin);
+            var len = (int)Math.Min(frame.Count, frame.ContentLength - frame.TotalWrite);
+            stream.Write(frame.Buffer, frame.BufferOffset, len);
+            frame.BytesWrite = len;
+            frame.TotalWrite += len;
             return ctx.Ok();
         }
 

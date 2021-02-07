@@ -8,3 +8,4 @@ C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.csproj.CopyComplete
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.dll
 C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.pdb
+C:\SoftConsult\TransferProto\Atoll.TransferService.Bundle\obj\Debug\netstandard2.0\Atoll.TransferService.Bundle.csprojAssemblyReference.cache

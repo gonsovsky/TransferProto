@@ -1,6 +1,7 @@
 ﻿using System;
 using Corallite.Buffers;
 
+// ReSharper disable once CheckNamespace
 namespace Atoll.TransferService
 {
     /// <summary>
@@ -34,20 +35,26 @@ namespace Atoll.TransferService
         public int Count;
 
         /// <summary>
-        /// Количество заполненных байт по результатам итерации чтения.
+        /// Количество заполненных байт по результатам итерации записи.
         /// </summary>
-        public int BytesRead;
+        public int BytesWrite;
 
         /// <summary>
-        /// Общее Количество отправленных байт сегмента.
+        /// Общее Количество полученных байт сегмента.
         /// </summary>
-        public int TotalRead;
+        public int TotalWrite;
+
+        /// <summary>
+        /// Общее Количество полученных байт сегмента.
+        /// </summary>
+        public int BufferSize;
 
         private readonly HotPutHandlerContext ctx;
 
         public HotPutHandlerFrame(HotPutHandlerContext ctx)
         {
             this.ctx = ctx;
+            this.BufferSize = ctx.Config.BufferSize;
             this.Buffer = UniArrayPool<byte>.Shared.Rent(ctx.Config.BufferSize);
         }
 

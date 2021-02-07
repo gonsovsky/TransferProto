@@ -1,13 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using Corallite.Buffers;
 
+// ReSharper disable once CheckNamespace
 namespace Atoll.TransferService
 {
-    public class HotPutHandlerContext: HotContext, IHotPutHandlerContext, IDisposable
+    public class HotPutHandlerContext: HotContext, IHotPutHandlerContext
     {
         public IHotPutHandler Handler;
 
@@ -40,7 +38,13 @@ namespace Atoll.TransferService
 
         public override bool DataReceived(int cnt)
         {
-            return false;
+            Frame.Count = cnt;
+            Handler.Write(this);
+            if (Frame.TotalWrite >= Frame.ContentLength)
+            {
+                return false;
+            }
+            return true;
         }
 
         public override bool DataSent()
@@ -48,14 +52,6 @@ namespace Atoll.TransferService
             if (base.DataSent())
                 return true;
             return false;
-        }
-
-        public override byte[] SendData => Frame.Buffer;
-
-        public override int SendBytes
-        {
-            get => Frame.BytesRead;
-            set => Frame.BytesRead = value;
         }
 
         public HotPutHandlerRequest Request { get; set; }

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 
 namespace TestClient
 {
@@ -7,7 +8,7 @@ namespace TestClient
         private static void Main()
         {
             var fs = new Fs(Helper.AssemblyDirectory);
-            var agent = new Agent(3000, "localhost", 256, fs)
+            var agent = new Agent(3000, "localhost", 1024, fs)
             {
                 OnRequest = (party, state) =>
                 {
@@ -29,22 +30,32 @@ namespace TestClient
             };
 
 
-            agent.Cmd("upload", "456.txt", 0, 0);
+            agent.Cmd("download", new Contract() { Url = "abc.txt" });
 
-            Console.ReadKey();
+            agent.Cmd("download", new Contract() { Url = "../../../../../../pagefile.sys" });
 
-            agent.Cmd("download", "abc.txt", 0, 0);
+            var a = new Contract() { Url = "123.txt", Offset = 0, Length = 1500, File = "123-1.txt"};
+            agent.Cmd("download", a);
 
-            agent.Cmd("download", "../../../../../../pagefile.sys", 0, 500000);
-
-            agent.Cmd("download", "123.txt", 0, 1500, "123-1.txt");
-
-            agent.Cmd("download", "123.txt", 1500, 0, "123-2.txt");
+            a = new Contract() { Url = "123.txt", Offset = 1500, Length = 0, File = "123-1.txt" };
+            agent.Cmd("download", a);
 
             Helper.Combine(Helper.AssemblyDirectory,
                 new[] { "123-1.txt", "123-2.txt" }, "123.txt");
 
-            agent.Cmd("list", "/", 0, 0);
+            agent.Cmd("list", new Contract() { Url = "/" });
+
+            agent.Cmd("delete", new Contract(){Url = "abrakadabra"});
+
+            a = new Contract()
+            {
+                Url = "456.txt",
+                Offset = 0,
+                Length = new FileInfo("456.txt").Length
+            };
+            agent.Cmd("upload", a,
+                new FileStream("456.txt", FileMode.Open, FileAccess.Read, FileShare.Read)
+            );
 
             Console.WriteLine("enter to close");
             Console.ReadLine();

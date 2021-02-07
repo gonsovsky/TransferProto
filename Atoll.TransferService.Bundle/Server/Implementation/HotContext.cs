@@ -1,14 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Corallite.Buffers;
 
-
+// ReSharper disable once CheckNamespace
 namespace Atoll.TransferService
 {
+    /// <summary>
+    /// Время жизни этого класса от события Accept до Receive т.е. достаточного для определения Route
+    /// Далее класс переливается (не копируется) в конкретный Get или Put Context. 
+    /// </summary>
     public class HotContext: IDisposable
     {
         public class HotAccept
@@ -82,40 +85,28 @@ namespace Atoll.TransferService
         {
             if (HeadSent) return false;
             HeadSent = true;
-            using (var ms = new MemoryStream(SendData, true))
+            using (var ms = new MemoryStream(TransmitData, true))
             {
                 using (var writer = new BinaryWriter(ms))
                 {
                     writer.Write((int)ResponseStatus);
-                    writer.Write((int)ResponseMessage.Length);
+                    writer.Write(ResponseMessage.Length);
                     writer.Write(Encoding.UTF8.GetBytes(ResponseMessage));
                 }
             }
-            SendBytes = 8 + ResponseMessage.Length;
+            TransmitBytes = 8 + ResponseMessage.Length;
             return true;
         }
 
-        public virtual int SendBytes
-        {
-            get
-            {
-                //must be overrided
-                throw new NotImplementedException();
-            }
-            set
-            {
-                //must be overrided
-                throw new NotImplementedException();
-            }
-        }
+        public virtual int TransmitBytes { get; set; }
 
-        public virtual byte[] SendData
+        public virtual byte[] TransmitData => Buffer;
+
+        public HotContext UnknownRoute(string message = "")
         {
-            get
-            {
-                //must be overrided
-                throw new NotImplementedException();
-            }
+            ResponseStatus = HttpStatusCode.MethodNotAllowed;
+            ResponseMessage = message;
+            return this;
         }
     }
 }
