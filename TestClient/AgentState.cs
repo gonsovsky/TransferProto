@@ -22,15 +22,18 @@ namespace TestClient
 
         protected bool HeadRecv;
 
+        public bool KeepAlive;
+
         public bool HeadSent;
 
         public string file;
 
-        public AgentState(int bufferSize, string route, Contract a, Stream data, IFs fs)
+        public AgentState(Config cfg, string route, Contract a, Stream data, IFs fs)
         {
             this.fs =fs;
-            this.SendData = data;
-            this.Buffer = UniArrayPool<byte>.Shared.Rent(bufferSize);
+            this.BufferSize = cfg.BufferSize;
+            this.KeepAlive = cfg.IsKeepAlive;
+            this.Buffer = UniArrayPool<byte>.Shared.Rent(BufferSize);
 
             SendPacket = new SendPacket()
             {
@@ -45,10 +48,9 @@ namespace TestClient
             }
             this.SendData = data;
             this.file = a.File;
-            this.BufferSize = bufferSize;
         }
 
-        protected Stream RecvStream;
+        public Stream RecvStream;
 
         public RecvPacket RecvPacket;
 
@@ -113,7 +115,7 @@ namespace TestClient
                 return false;
             if (SendPacket.Route != "upload"|| SendData == null)
                 return false;
-            return SendData.Position >= SendData.Length;
+            return SendData.Position < SendData.Length;
         }
 
         private readonly IFs fs;
@@ -127,9 +129,12 @@ namespace TestClient
             if (Buffer != null)
                 UniArrayPool<byte>.Shared.Return(this.Buffer);
             Buffer = null;
-            this.Socket?.Shutdown(SocketShutdown.Both);
-            this.Socket?.Close();
-            this.Socket = null;
+            if (!KeepAlive)
+            {
+                this.Socket?.Shutdown(SocketShutdown.Both);
+                this.Socket?.Close();
+                this.Socket = null;
+            }
         }
 
         public string Url => SendPacket.Url();

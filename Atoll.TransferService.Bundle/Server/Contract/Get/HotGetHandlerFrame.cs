@@ -44,6 +44,13 @@ namespace Atoll.TransferService
         /// </summary>
         public int TotalRead;
 
+        /// <summary>
+        /// Общее Количество байт которые следует отправить клиенту. Это значение складывается из
+        /// полученного аргумента ContentLength/ContentOffset и размера ресурса открытого обработчиком.
+        /// Значение необходимо для режима KeepAlive, что бы клиент знал когда ему "отключаться"
+        /// </summary>
+        public int HaveToRead;
+
         private readonly HotGetHandlerContext ctx;
 
         public HotGetHandlerFrame(HotGetHandlerContext ctx)

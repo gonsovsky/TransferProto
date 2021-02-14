@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Net;
+using System.Net.Mime;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Atoll.TransferService.Server.Implementation;
 
 // ReSharper disable once CheckNamespace
 namespace Atoll.TransferService
@@ -18,37 +21,64 @@ namespace Atoll.TransferService
 
         private HotServerRouteCollection routesCollection;
 
-        private Socket listener;
-
         private readonly ManualResetEvent allDone =
             new ManualResetEvent(false);
 
-        private readonly CancellationTokenSource cancellationToken = 
-            new CancellationTokenSource();
+        private CancellationTokenSource externalToken;
 
-        public void Start()
+        private CancellationTokenSource localToken;
+
+        public void Start(CancellationTokenSource token)
+        {
+            externalToken = token ?? throw new ArgumentNullException();
+
+            localToken = CancellationTokenSource.CreateLinkedTokenSource(externalToken.Token);
+            Task.Factory.StartNew(this.Start, localToken.Token);
+        }
+
+        private void Start()
         {
             allDone.Reset();
-            var localEndPoint = new IPEndPoint(IPAddress.Any, config.Port);
-            listener = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-            listener.Bind(localEndPoint);
-            listener.Listen(100);
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                allDone.Reset();
-                listener.BeginAccept(
-                    AcceptCallback,
-                    listener);
-                allDone.WaitOne();
+                var localEndPoint = new IPEndPoint(IPAddress.Any, config.Port);
+                var listener = new Socket(AddressFamily.InterNetwork,
+                    SocketType.Stream, ProtocolType.Tcp);
+                listener.Bind(localEndPoint);
+                listener.Listen(100);
+                while (!localToken.IsCancellationRequested)
+                {
+                    allDone.Reset();
+                    try
+                    {
+                        listener.BeginAccept(
+                            AcceptCallback,
+                            listener);
+                    }
+                    catch (Exception e)
+                    {
+                        Misc.Log(e);
+                    }
+                    allDone.WaitOne();
+                    localToken.Token.ThrowIfCancellationRequested();
+                }
+                //listener.Shutdown(SocketShutdown.Both);
+                //listener.Close();
+            }
+            catch (SocketException e)
+            {
+                Misc.Log(e.Message);
+            }
+            catch (OperationCanceledException e)
+            {
+                if (e.CancellationToken == externalToken.Token)
+                    Console.WriteLine("Server is stopped.");
             }
         }
 
         public void Stop()
         {
-            cancellationToken.Cancel();
-            listener.Shutdown(SocketShutdown.Both);
-            listener.Close();
+            localToken?.Cancel();
         }
 
         public HotServer UseConfig(HotServerConfiguration aCfg)
@@ -57,166 +87,234 @@ namespace Atoll.TransferService
             return this;
         }
 
+        private static readonly object Locker = new object();
+
         public HotServer UseRoutes(HotServerRouteCollection aRoutesCollection)
         {
-            this.routesCollection = new HotServerRouteCollection();
-            foreach (var route in aRoutesCollection.GetRoutes)
-                this.routesCollection.RouteGet(route.Key, route.Value);
-            foreach (var route in aRoutesCollection.PutRoutes)
-                this.routesCollection.RoutePut(route.Key, route.Value);
-            return this;
+            lock (Locker)
+            {
+                this.routesCollection = new HotServerRouteCollection();
+                foreach (var route in aRoutesCollection.GetRoutes)
+                    this.routesCollection.RouteGet(route.Key, route.Value);
+                foreach (var route in aRoutesCollection.PutRoutes)
+                    this.routesCollection.RoutePut(route.Key, route.Value);
+                return this;
+            }
         }
 
         public void Dispose()
         {
+            Stop();
         }
         #endregion
 
         #region Accept
-        private void AcceptCallback(IAsyncResult ar)
+        void AcceptCallback(IAsyncResult ar)
         {
             allDone.Set();
-            var client = (Socket)ar.AsyncState;
-            var sock = client.EndAccept(ar);
-            var ctxAccept = new HotContext(sock, config);
-            sock.BeginReceive(ctxAccept.Buffer, 0, ctxAccept.BufferSize, 0,
-                ReadCallback, ctxAccept);
-            Console.WriteLine($"Client connected");
-        }
-
-        public void ReadCallback(IAsyncResult ar)
-        {
-            var ctxAccept = (HotContext)ar.AsyncState;
-            var bytesRead = ctxAccept.Socket.EndReceive(ar);
-            if (bytesRead <= 0)
-                return;
-            if (ctxAccept.DataReceived(bytesRead))
+            Socket sock=null;
+            HotContext ctxAccept=null;
+            try
             {
-                switch (ctxAccept.Accept.Route)
-                {
-                    case "download":
-                    case "list":
-                        var ctx = new HotGetHandlerContext(ctxAccept);
-                        if (routesCollection.GetRoutes.TryGetValue(ctxAccept.Accept.Route, out var factory))
-                        {
-                            ctx.Handler = factory.Create(ctx);
-                            ctx.Handler.Open(ctx);
-                        }
-                        ctxAccept.Dispose();
-                        if (ctx.DataSent())
-                            Send(ctx);
-                        break;
-                    case "upload":
-                        var ctxUp = new HotPutHandlerContext(ctxAccept);
-                        if (routesCollection.PutRoutes.TryGetValue(ctxAccept.Accept.Route, out var factoryUp))
-                        {
-                            ctxUp.Handler = factoryUp.Create(ctxUp);
-                            ctxUp.Handler.Open(ctxUp);
-                        }
-                        ctxAccept.Dispose();
-                        if (ctxUp.DataSent())
-                            Send(ctxUp);
-                        RecvUpload(ctxUp);
-                        break;
-                    default:
-                        ctxAccept.UnknownRoute($"Route is not supported");
-                        if (ctxAccept.DataSent())
-                            Send(ctxAccept);
-                        break;
-                }
+                var client = (Socket) ar.AsyncState;
+                sock = client.EndAccept(ar);
+                if (config.IsKeepAlive)
+                    sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                ctxAccept = new HotContext(sock, config);
+                Receive(ctxAccept, true);
+                Misc.Log($"Client connected");
             }
-            else
+            catch (SocketException ex)
             {
-                Recv(ctxAccept);
+                ctxAccept?.Dispose();
+                sock?.Shutdown(SocketShutdown.Both);
+                sock?.Close();
+                Misc.Log(ex.Message);
             }
         }
         #endregion
 
-        #region Request And Response
+        #region ReUse
+        private void ReUseOrRestart(HotContext ctx)
+        {
+            var sock = ctx.Socket;
+            Misc.Log($"Client finished with: {ctx.ResponseStatus}");
+            //ctx.Socket?.Shutdown(SocketShutdown.Both);
+            //ctx.Socket?.Close();
+            ctx.Dispose();
+            allDone.Set();
+            if (config.IsKeepAlive)
+            {
+                ctx = new HotContext(sock, config);
+                Receive(ctx, true);
+            }
+        }
+
+        private void Abort(HotContext ctx, SocketException e)
+        {
+            Misc.Log($"Client aborted");
+            ctx.Dispose();
+            allDone.Set();
+        }
+        #endregion
+
+        #region Receive
+#if NETSTANDARD
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Recv(HotContext ctx, bool now = false)
+#else
+        [MethodImpl(256)]
+#endif
+        private void Receive(HotContext ctx, bool now = false)
         {
             if (now)
             {
-                ctx.Socket.BeginReceive(ctx.Buffer, ctx.BufferOffset,
-                    ctx.BufferSize - ctx.BufferOffset, 0,
-                    ReadCallback, ctx);
+                if (ctx is HotPutHandlerContext ctxUp)  //uploading file now
+                    ctxUp.Socket.BeginReceive(ctxUp.Frame.Buffer, 0,
+                        ctxUp.Frame.BufferSize, 0, ReceiveCallBack, ctxUp);
+                else
+                    ctx.Socket.BeginReceive(ctx.Buffer, ctx.BufferOffset, //receiving head of any request
+                        ctx.BufferSize - ctx.BufferOffset, 0, ReceiveCallBack, ctx);
                 return;
             }
             if (config.Delay == 0)
-                Recv(ctx, true);
+                Receive(ctx, true);
             else
-                Task.Delay(config.Delay).ContinueWith(a => Recv(ctx, true));
+                Misc.Delay(config.Delay).ContinueWith(a => Receive(ctx, true));
         }
 
+        private void ReceiveCallBack(IAsyncResult ar)
+        {
+            var ctxAccept = (HotContext)ar.AsyncState;
+
+            if (ctxAccept is HotPutHandlerContext ctxUpload) //uploading file now
+            {
+                try
+                {
+                    var bytesRead = ctxUpload.Socket.EndReceive(ar);
+                    if (bytesRead <= 0 || ctxUpload.DataReceived(bytesRead) == false)
+                    {
+                        ReUseOrRestart(ctxUpload);
+                        return;
+                    }
+                    localToken.Token.ThrowIfCancellationRequested();
+                    Receive(ctxUpload);
+                }
+                catch (SocketException e)
+                {
+                    Abort(ctxUpload, e);
+                }
+                return;
+            }
+
+            HotGetHandlerContext ctx = null;
+            HotPutHandlerContext ctxUp = null;
+            try
+            {
+                var bytesRead = ctxAccept.Socket.EndReceive(ar);
+                if (bytesRead <= 0)
+                    return;
+                localToken.Token.ThrowIfCancellationRequested();
+                if (ctxAccept.DataReceived(bytesRead))
+                {
+                    switch (ctxAccept.Accept.Route)
+                    {
+                        case Routes.Download:
+                        case Routes.List:
+                            ctx = new HotGetHandlerContext(ctxAccept);
+                            if (routesCollection.GetRoutes.TryGetValue(ctxAccept.Accept.Route, out var factory))
+                            {
+                                ctx.Handler = factory.Create(ctx);
+                                ctx.Handler.Open(ctx);
+                            }
+                            ctxAccept.Dispose();
+                            ctxAccept = null;
+                            if (ctx.DataSent())
+                                Send(ctx);
+                            break;
+                        case Routes.Upload:
+                            ctxUp = new HotPutHandlerContext(ctxAccept);
+                            if (routesCollection.PutRoutes.TryGetValue(ctxAccept.Accept.Route, out var factoryUp))
+                            {
+                                ctxUp.Handler = factoryUp.Create(ctxUp);
+                                ctxUp.Handler.Open(ctxUp);
+                            }
+                            ctxAccept.Dispose();
+                            ctxAccept = null;
+                            if (ctxUp.DataSent())
+                                Send(ctxUp);
+                            Receive(ctxUp);
+                            break;
+                        default:
+                            ctxAccept.UnknownRoute($"Route is not supported");
+                            if (ctxAccept.DataSent())
+                                Send(ctxAccept);
+                            break;
+                    }
+                }
+                else
+                {
+                    Receive(ctxAccept);
+                }
+            }
+            catch (SocketException ex)
+            {
+                ctx?.Dispose();
+                ctxUp?.Dispose();
+                Misc.Log(ex.Message);
+            }
+            finally
+            {
+                ctxAccept?.Dispose();
+            }
+        }
+        #endregion
+
+        #region Send
+#if NETSTANDARD
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#else
+        [MethodImpl(256)]
+#endif
         private void Send(HotContext ctx, bool now = false)
         {
             if (now)
             {
-                ctx.Socket.BeginSend(ctx.TransmitData, 0, ctx.TransmitBytes, 0,
-                    SendCallback, ctx);
-                return;
+                try
+                {
+                    ctx.Socket.BeginSend(ctx.TransmitData, 0, ctx.TransmitBytes, 0,
+                        SendCallback, ctx);
+                    return;
+                }
+                catch (SocketException e)
+                {
+                    Abort(ctx, e);
+                    return;
+                }
             }
             if (config.Delay == 0)
                 Send(ctx, true);
             else
-                Task.Delay(config.Delay).ContinueWith(a => Send(ctx, true));
+                Misc.Delay(config.Delay).ContinueWith(a => Send(ctx, true));
         }
 
-        void SendCallback(IAsyncResult ar)
+        private void SendCallback(IAsyncResult ar)
         {
             var ctx = (HotContext)ar.AsyncState;
-            ctx.Socket.EndSend(ar);
-            if (ctx.ResponseStatus != HttpStatusCode.OK)
+            try
             {
-                Console.WriteLine($"Client disconnected {ctx.ResponseStatus}");
-                ctx.Dispose();
-                allDone.Set();
-                return;
+                localToken.Token.ThrowIfCancellationRequested();
+                ctx.Socket.EndSend(ar);
+                if (ctx.ResponseStatus != HttpStatusCode.OK)
+                    ReUseOrRestart(ctx);
+                else
+                if (ctx.DataSent())
+                    Send(ctx);
+                else if (!(ctx is HotPutHandlerContext))
+                    ReUseOrRestart(ctx);
             }
-            if (ctx.DataSent())
-                Send(ctx);
-            else if (!(ctx is HotPutHandlerContext))
+            catch (SocketException e)
             {
-                Console.WriteLine($"Client disconnected");
-                ctx.Dispose();
-                allDone.Set();
-            }
-        }
-        #endregion
-
-        #region Upload
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void RecvUpload(HotPutHandlerContext ctxUp, bool now = false)
-        {
-            if (now)
-            {
-                ctxUp.Socket.BeginReceive(ctxUp.Frame.Buffer, 0,
-                    ctxUp.Frame.BufferSize, 0,
-                    ReadCallbackUpload, ctxUp);
-                return;
-            }
-            if (config.Delay == 0)
-                RecvUpload(ctxUp, true);
-            else
-                Task.Delay(config.Delay).ContinueWith(a => RecvUpload(ctxUp, true));
-        }
-
-        public void ReadCallbackUpload(IAsyncResult ar)
-        {
-            var ctxUp = (HotPutHandlerContext)ar.AsyncState;
-            var bytesRead = ctxUp.Socket.EndReceive(ar);
-            if (bytesRead <= 0 || ctxUp.DataReceived(bytesRead) ==false)
-            {
-                Console.WriteLine($"Upload complete");
-                ctxUp.Dispose();
-                allDone.Set();
-                return;
-            }
-            else
-            {
-                RecvUpload(ctxUp);
+                Abort(ctx, e);
             }
         }
         #endregion

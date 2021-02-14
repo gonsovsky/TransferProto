@@ -16,6 +16,8 @@ namespace TestClient
 
         public byte[] BodyData;
 
+        public int DataSize;
+
         public static RecvPacket FromByteArray(byte[] bytes, int cnt)
         {
             using (var reader = new BinaryReader(new MemoryStream(bytes)))
@@ -26,6 +28,7 @@ namespace TestClient
                     BodyLen = reader.ReadInt32()
                 };
                 res.BodyData = reader.ReadBytes(res.BodyLen);
+                res.DataSize = reader.ReadInt32();
                
                 return res;
             }

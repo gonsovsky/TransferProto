@@ -21,6 +21,9 @@ namespace TestServer
                 }
                 writer.Flush();
             }
+            
+            //необходимо для режима KeepAlive
+            ctx.Frame.HaveToRead = (int)responseStream.Length;
 
             responseStream.Position = 0;
             return ctx.Ok();

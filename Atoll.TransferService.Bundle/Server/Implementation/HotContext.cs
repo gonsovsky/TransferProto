@@ -10,7 +10,7 @@ namespace Atoll.TransferService
 {
     /// <summary>
     /// Время жизни этого класса от события Accept до Receive т.е. достаточного для определения Route
-    /// Далее класс переливается (не копируется) в конкретный Get или Put Context. 
+    /// Далее класс переходит в конкретный Get или Put Context. 
     /// </summary>
     public class HotContext: IDisposable
     {
@@ -37,6 +37,10 @@ namespace Atoll.TransferService
 
         public int BufferSize;
 
+        protected MemoryStream BufferStream;
+
+        protected BinaryReader BufferReader;
+
         public HttpStatusCode ResponseStatus;
 
         public string ResponseMessage;
@@ -51,7 +55,10 @@ namespace Atoll.TransferService
 
         public virtual void Dispose()
         {
-            //nothing
+            BufferReader?.Dispose();
+            BufferReader = null;
+            BufferStream?.Dispose();
+            BufferStream = null;
         }
 
         public virtual bool DataReceived(int cnt)
@@ -59,18 +66,25 @@ namespace Atoll.TransferService
             BufferOffset += cnt;
             if (this.Accept != null)
                 return true;
+            if (BufferStream == null)
+            {
+                BufferStream = new MemoryStream(Buffer);
+                BufferReader = new BinaryReader(BufferStream);
+            }
+
             try
             {
-                using (var reader = new BinaryReader(new MemoryStream(Buffer)))
-                {
-                    Accept = new HotAccept {RouteLen = reader.ReadInt32()};
-                    Accept.RouteData  = reader.ReadBytes(Accept.RouteLen);
-                    Accept.BodyLen = reader.ReadInt32();
-                    Accept.BodyData = reader.ReadBytes(Accept.BodyLen);
-                    Accept.ContentOffset = reader.ReadInt64();
-                    Accept.ContentLength = (int) reader.ReadInt64();
-                    Accept.Route = Accept.RouteData.MakeString(Accept.RouteLen);
-                }
+                Accept = new HotAccept {RouteLen = BufferReader.ReadInt32()};
+                if (BufferStream.Length < Accept.RouteLen + 4)
+                    return false;
+                Accept.RouteData = BufferReader.ReadBytes(Accept.RouteLen);
+                Accept.BodyLen = BufferReader.ReadInt32();
+                if (BufferStream.Length < Accept.RouteLen + Accept.BodyLen + 8)
+                    return false;
+                Accept.BodyData = BufferReader.ReadBytes(Accept.BodyLen);
+                Accept.ContentOffset = BufferReader.ReadInt64();
+                Accept.ContentLength = (int)BufferReader.ReadInt64();
+                Accept.Route = Accept.RouteData.MakeString(Accept.RouteLen);
                 return true;
             }
             catch (EndOfStreamException) //минимум данных пока не добрался
@@ -81,7 +95,7 @@ namespace Atoll.TransferService
 
         public bool HeadSent;
 
-        public virtual bool DataSent()
+        public virtual bool DataSent(int dataSize=0)
         {
             if (HeadSent) return false;
             HeadSent = true;
@@ -92,9 +106,10 @@ namespace Atoll.TransferService
                     writer.Write((int)ResponseStatus);
                     writer.Write(ResponseMessage.Length);
                     writer.Write(Encoding.UTF8.GetBytes(ResponseMessage));
+                    writer.Write(dataSize);
                 }
             }
-            TransmitBytes = 8 + ResponseMessage.Length;
+            TransmitBytes = 12 + ResponseMessage.Length;
             return true;
         }
 

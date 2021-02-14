@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -14,11 +15,7 @@ namespace TestClient
 
     public class Agent
     {
-        private readonly string net;
-
-        private readonly int port;
-
-        private readonly int bufferSize;
+        private readonly Config cfg;
 
         private readonly IFs fs;
 
@@ -28,12 +25,11 @@ namespace TestClient
 
         public StateErrorEvent OnAbort { get; set; }
 
-        public Agent(int port, string net, int bufferSize, IFs fs)
+        public Agent(Config cfg, IFs fs)
         {
-            this.port = port;
-            this.net = net;
-            this.bufferSize = bufferSize;
+            this.cfg = cfg;
             this.fs = fs;
+            ReUse.cfg = cfg;
         }
 
         protected readonly ManualResetEvent ConnectDone =
@@ -50,18 +46,22 @@ namespace TestClient
             ConnectDone.Reset();
             SendDone.Reset();
             ReceiveDone.Reset();
-            var state = new AgentState(bufferSize, route, contract, data, fs);
+            var state = new AgentState(cfg, route, contract, data, fs);
             try
             {
-                var ipHostInfo = Dns.GetHostEntry(net);
-                var ipAddress = ipHostInfo.AddressList
-                    .First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
-                var remoteEp = new IPEndPoint(ipAddress, port);
-                var client = new Socket(ipAddress.AddressFamily,
-                    SocketType.Stream, ProtocolType.Tcp);
+                Socket client;
+                if (!cfg.IsKeepAlive)
+                    client = NewSocket(state);
+                else
+                {
+                    client = ReUse.Get();
+                    if (client == null)
+                    {
+                        client = NewSocket(state);
+                        ReUse.Put(client);
+                    }
+                }
                 state.Socket = client;
-                client.BeginConnect(remoteEp, ConnectCallback, state);
-                ConnectDone.WaitOne();
                 Send(state);
                 SendDone.WaitOne();
                 Receive(state);
@@ -78,6 +78,22 @@ namespace TestClient
                 Abort(state, e);
                 return null;
             }
+        }
+
+        protected Socket NewSocket(AgentState state)
+        {
+            var ipHostInfo = Dns.GetHostEntry(cfg.Net);
+            var ipAddress = ipHostInfo.AddressList
+                .First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+            var remoteEp = new IPEndPoint(ipAddress, cfg.Port);
+            var client = new Socket(ipAddress.AddressFamily,
+                SocketType.Stream, ProtocolType.Tcp);
+            state.Socket = client;
+            client.BeginConnect(remoteEp, ConnectCallback, state);
+            //if (cfg.IsKeepAlive)
+            //    client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            ConnectDone.WaitOne();
+            return client;
         }
 
         private void ConnectCallback(IAsyncResult ar)
@@ -155,8 +171,17 @@ namespace TestClient
 
                     if (state.SendPacket.Route != "upload")
                     {
-                        client.BeginReceive(state.Buffer, 0, state.BufferSize, 0,
-                            ReceiveCallback, state);
+                        if (state.RecvPacket != null && state.RecvPacket.StatusCode == HttpStatusCode.OK
+                                                     && state.RecvStream.Length == state.RecvPacket.DataSize)
+                        {
+                            ReceiveDone.Set();
+                            return;
+                        }
+                        else
+                        {
+                            client.BeginReceive(state.Buffer, 0, state.BufferSize, 0,
+                                ReceiveCallback, state);
+                        }
                     }
                     else
                     {

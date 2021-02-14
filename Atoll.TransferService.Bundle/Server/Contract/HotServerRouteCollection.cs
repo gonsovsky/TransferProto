@@ -65,25 +65,6 @@ namespace Atoll.TransferService
         }
 
         /// <summary>
-        /// Добавить маршрут запросов получения и передачи данных.
-        /// </summary>
-        /// <param name="route">маршрут.</param>
-        /// <param name="getFactory">экземпляр фабрики обработчиков запросов получения данных.</param>
-        /// <param name="putFactory">экземпляр фабрики обработчиков запросов передачи данных.</param>
-        /// <returns>коллекция маршрутов обработки запросов.</returns>
-        public static HotServerRouteCollection Route(this HotServerRouteCollection routes, string route, IHotGetHandlerFactory getFactory, IHotPutHandlerFactory putFactory)
-        {
-            if (route == null) throw new ArgumentNullException(nameof(route));
-            if (getFactory == null) throw new ArgumentNullException(nameof(getFactory));
-            if (putFactory == null) throw new ArgumentNullException(nameof(putFactory));
-
-            routes.GetRoutes.Add(route, getFactory);
-            routes.PutRoutes.Add(route, putFactory);
-
-            return routes;
-        }
-
-        /// <summary>
         /// Добавить маршрут запросов получения данных.
         /// </summary>
         /// <param name="route">маршрут.</param>

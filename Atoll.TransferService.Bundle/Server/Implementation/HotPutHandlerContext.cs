@@ -22,12 +22,16 @@ namespace Atoll.TransferService
 
         public override void Dispose()
         {
+            base.Dispose();
             if (Buffer != null)
                 UniArrayPool<byte>.Shared.Return(this.Buffer);
             Buffer = null;
-            Socket?.Shutdown(SocketShutdown.Both);
-            Socket?.Close();
-            Socket = null;
+            if (!Config.IsKeepAlive)
+            {
+                Socket?.Shutdown(SocketShutdown.Both);
+                Socket?.Close();
+                Socket = null;
+            }
             Handler?.Dispose();
             Handler = null;
             Request?.Dispose();
@@ -47,9 +51,9 @@ namespace Atoll.TransferService
             return true;
         }
 
-        public override bool DataSent()
+        public override bool DataSent(int datasize=0)
         {
-            if (base.DataSent())
+            if (base.DataSent(datasize))
                 return true;
             return false;
         }

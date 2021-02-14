@@ -25,10 +25,7 @@ namespace Atoll.TransferService
                 return ctx.Ok();
             }
             stream.Seek(frame.ContentOffset + frame.TotalRead, SeekOrigin.Begin);
-            var len = frame.ContentLength;
-            if (frame.ContentLength == 0)
-                len = stream.Length - stream.Position;
-            var total = (int)Math.Min(frame.Count, Math.Min(len, stream.Length - stream.Position));
+            var total = (int)Math.Min(frame.Count, frame.HaveToRead - frame.TotalRead);
             var read = stream.Read(frame.Buffer, frame.BufferOffset, total);
             frame.BytesRead = read;
             frame.TotalRead += read;

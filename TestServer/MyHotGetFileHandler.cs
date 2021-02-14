@@ -34,6 +34,16 @@ namespace TestServer
                     FileMode.Open,
                     FileAccess.Read,
                     FileShare.Read);
+
+                //Необходимо для режима KeepAlive
+                if (ctx.Frame.ContentLength == 0 && ctx.Frame.ContentOffset == 0)
+                    ctx.Frame.HaveToRead = (int)fileStream.Length;
+                else if (ctx.Frame.ContentLength == 0 && ctx.Frame.ContentOffset != 0)
+                    ctx.Frame.HaveToRead = (int)(fileStream.Length- ctx.Frame.ContentOffset);
+                else if (ctx.Frame.ContentLength != 0 && ctx.Frame.ContentOffset == 0)
+                    ctx.Frame.HaveToRead = (int) (Math.Min(ctx.Frame.ContentLength, fileStream.Length));
+                else if (ctx.Frame.ContentLength != 0 && ctx.Frame.ContentOffset != 0)
+                    ctx.Frame.HaveToRead = (int)(Math.Min(ctx.Frame.ContentLength, fileStream.Length- ctx.Frame.ContentOffset));
             }
             catch (FileNotFoundException)
             {
