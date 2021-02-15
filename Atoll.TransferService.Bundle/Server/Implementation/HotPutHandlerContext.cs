@@ -12,9 +12,8 @@ namespace Atoll.TransferService
         public HotPutHandlerContext(HotContext source): base(source.Socket, source.Config)
         {
             this.Accept = source.Accept;
-            this.Buffer = source.Buffer;
+            this.Buffer = UniArrayPool<byte>.Shared.Rent(source.BufferSize);
             this.BufferSize = source.BufferSize;
-            this.BufferOffset = source.BufferOffset;
             Request = new HotPutHandlerRequest(Accept.Route, Accept.BodyData, Accept.BodyLen);
             Frame = new HotPutHandlerFrame(this);
             this.Frame.ContentLength = source.Accept.ContentLength;
