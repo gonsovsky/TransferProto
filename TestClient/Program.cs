@@ -40,9 +40,6 @@ namespace TestClient
                 new FileStream("456.txt", FileMode.Open, FileAccess.Read, FileShare.Read)
             );
 
-            Console.ReadKey();
-
-
             agent.Cmd("download", new Contract() { Url = "abc.txt" });
 
             agent.Cmd("download", new Contract() { Url = "../../../../../../pagefile.sys" });
