@@ -120,6 +120,7 @@ namespace Atoll.TransferService
                 sock = client.EndAccept(ar);
                 if (config.IsKeepAlive)
                     sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                sock.NoDelay = true;
                 ctxAccept = new HotContext(sock, config);
                 Receive(ctxAccept, true);
                 Misc.Log($"Client connected");
@@ -242,6 +243,11 @@ namespace Atoll.TransferService
                             ctxAccept = null;
                             if (ctxUp.DataSent())
                                 Send(ctxUp);
+                            if (ctxUp.DataReceived(bytesRead - ctxUp.Frame.BufferOffset) == false) //read rest of bytes from HotContext
+                            {
+                                ReUseOrRestart(ctxUp);
+                                return;
+                            }
                             Receive(ctxUp);
                             break;
                         default:

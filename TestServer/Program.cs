@@ -23,7 +23,7 @@ namespace TestServer
                     .UseRoutes(routes)
                     .UseConfig(new HotServerConfiguration
                     {
-                        Port = 3000, BufferSize = 512, Delay = 50, KeepAlive = 0
+                        Port = 3000, BufferSize = 512, Delay = 0, KeepAlive = 1
                     });
 
                 server.Start(Cts);

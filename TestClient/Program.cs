@@ -9,7 +9,7 @@ namespace TestClient
         {
             var fs = new Fs(Helper.AssemblyDirectory);
             var agent = new Agent(new Config()
-                { BufferSize = 1024, KeepAlive = 0, Net = "localhost", Port = 3000}, 
+                { BufferSize = 512, KeepAlive = 1, Net = "localhost", Port = 3000}, 
                 fs)
             {
                 OnRequest = (party, state) =>
@@ -29,6 +29,20 @@ namespace TestClient
                 }
             };
 
+            agent.Cmd("upload",
+                new Contract()
+                {
+                    Url = "456.txt",
+                    Offset = 0,
+                    Length = new FileInfo("456.txt").Length
+                }
+                ,
+                new FileStream("456.txt", FileMode.Open, FileAccess.Read, FileShare.Read)
+            );
+
+            Console.ReadKey();
+
+
             agent.Cmd("download", new Contract() { Url = "abc.txt" });
 
             agent.Cmd("download", new Contract() { Url = "../../../../../../pagefile.sys" });
@@ -43,17 +57,6 @@ namespace TestClient
             agent.Cmd("list", new Contract() { Url = "/" });
 
             agent.Cmd("delete", new Contract(){Url = "abrakadabra"});
-
-            agent.Cmd("upload",
-                new Contract()
-                {
-                    Url = "456.txt",
-                    Offset = 0,
-                    Length = new FileInfo("456.txt").Length
-                }
-                ,
-                new FileStream("456.txt", FileMode.Open, FileAccess.Read, FileShare.Read)
-            );
 
             Console.WriteLine("enter to close");
             Console.ReadLine();

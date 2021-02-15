@@ -14,10 +14,14 @@ namespace Atoll.TransferService
             this.Accept = source.Accept;
             this.Buffer = source.Buffer;
             this.BufferSize = source.BufferSize;
+            this.BufferOffset = source.BufferOffset;
             Request = new HotPutHandlerRequest(Accept.Route, Accept.BodyData, Accept.BodyLen);
             Frame = new HotPutHandlerFrame(this);
             this.Frame.ContentLength = source.Accept.ContentLength;
             this.Frame.ContentOffset = source.Accept.ContentOffset;
+            this.Frame.BufferOffset = source.BufferOffset;
+            this.Frame.BufferSize = source.BufferSize;
+            this.Frame.Buffer = source.Buffer;
         }
 
         public override void Dispose()
@@ -44,6 +48,7 @@ namespace Atoll.TransferService
         {
             Frame.Count = cnt;
             Handler.Write(this);
+            Frame.BufferOffset = 0;
             if (Frame.TotalWrite >= Frame.ContentLength)
             {
                 return false;

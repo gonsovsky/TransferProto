@@ -9,8 +9,8 @@ using Corallite.Buffers;
 namespace Atoll.TransferService
 {
     /// <summary>
-    /// Время жизни этого класса от события Accept до Receive т.е. достаточного для определения Route
-    /// Далее класс переходит в конкретный Get или Put Context. 
+    /// Время жизни экземпляра класса от события Accept до Receive т.е. достаточного для определения Route
+    /// Далее экземпляр переходит в конкретный Get или Put Context. 
     /// </summary>
     public class HotContext: IDisposable
     {
@@ -85,6 +85,11 @@ namespace Atoll.TransferService
                 Accept.ContentOffset = BufferReader.ReadInt64();
                 Accept.ContentLength = (int)BufferReader.ReadInt64();
                 Accept.Route = Accept.RouteData.MakeString(Accept.RouteLen);
+
+                var total = 26 + Accept.BodyLen + Accept.RouteLen;
+
+                BufferOffset = total;
+
                 return true;
             }
             catch (EndOfStreamException) //минимум данных пока не добрался

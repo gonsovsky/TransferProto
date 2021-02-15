@@ -54,8 +54,9 @@ namespace Atoll.TransferService
         public HotPutHandlerFrame(HotPutHandlerContext ctx)
         {
             this.ctx = ctx;
-            this.BufferSize = ctx.Config.BufferSize;
-            this.Buffer = UniArrayPool<byte>.Shared.Rent(ctx.Config.BufferSize);
+            //See HotPutHandlerContext 
+            //this.BufferSize = ctx.Config.BufferSize;
+            //this.Buffer = UniArrayPool<byte>.Shared.Rent(ctx.Config.BufferSize);
         }
 
         public void Dispose()

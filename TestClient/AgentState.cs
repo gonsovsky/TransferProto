@@ -97,7 +97,7 @@ namespace TestClient
             }
             if (!HasSend())
                 return false;
-            SendData.Seek(bytesSent, SeekOrigin.Begin);
+            //SendData.Seek(bytesSent, SeekOrigin.Begin);
             var len = (int)Math.Min(BufferSize, (SendData.Length - SendData.Position));
             var cnt = SendData.Read(Buffer, 0, len);
             bytesSent += cnt;
