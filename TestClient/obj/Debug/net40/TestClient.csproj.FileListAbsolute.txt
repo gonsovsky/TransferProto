@@ -1,0 +1,13 @@
+C:\SoftConsult\TransferProto\TestClient\bin\Debug\net40\TestClient.exe.config
+C:\SoftConsult\TransferProto\TestClient\bin\Debug\net40\TestClient.exe
+C:\SoftConsult\TransferProto\TestClient\bin\Debug\net40\TestClient.pdb
+C:\SoftConsult\TransferProto\TestClient\bin\Debug\net40\Atoll.TransferService.Bundle.dll
+C:\SoftConsult\TransferProto\TestClient\bin\Debug\net40\Corallite.dll
+C:\SoftConsult\TransferProto\TestClient\bin\Debug\net40\Atoll.TransferService.Bundle.pdb
+C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.csproj.CoreCompileInputs.cache
+C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.AssemblyInfoInputs.cache
+C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.AssemblyInfo.cs
+C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.csproj.CopyComplete
+C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.exe
+C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.pdb
+C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.csprojAssemblyReference.cache

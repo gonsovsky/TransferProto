@@ -40,6 +40,7 @@ namespace TestClient
 
         public Stream Put(string filename)
         {
+            filename = System.IO.Path.GetFileName(filename);
             var file = Path.Combine(RootFolder, filename);
             var stream = new FileStream(file, FileMode.Create, FileAccess.Write);
             return stream;

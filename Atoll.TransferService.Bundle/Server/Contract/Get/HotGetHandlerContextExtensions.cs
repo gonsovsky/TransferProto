@@ -18,6 +18,7 @@ namespace Atoll.TransferService
         /// <returns>экземпляр контекста чтения данных.</returns>
         public static IHotGetHandlerContext ReadFromStream(this IHotGetHandlerContext ctx, Stream stream)
         {
+            ctx.Frame.BytesRead = 0;
             var frame = ctx.Frame;
             if (frame.ContentLength != 0 && frame.TotalRead >= frame.ContentLength)
             {

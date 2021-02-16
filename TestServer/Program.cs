@@ -7,7 +7,7 @@ namespace TestServer
 {
     internal class Program
     {
-        static readonly CancellationTokenSource Cts = new CancellationTokenSource();
+        static CancellationTokenSource Cts = new CancellationTokenSource();
 
         private static void Main()
         {
@@ -22,18 +22,22 @@ namespace TestServer
                     .UseRoutes(routes)
                     .UseConfig(new HotServerConfiguration
                     {
-                        Port = 3000, BufferSize = 256, Delay = 1000, KeepAlive =1
+                        Port = 3000, BufferSize = 256, Delay = 200, KeepAlive = 1
                     });
 
                 server.Start(Cts);
 
-                Console.WriteLine("Server started. Press 'Enter' to stop.");
+                while (true)
+                {
+                    Console.WriteLine("Server started. Press 'Enter' to stop.");
+                    Console.ReadKey();
+                    server.Stop();
 
-                Console.ReadKey();
-                server.Stop();
-
-                Console.WriteLine("Ready to exit");
-                Console.ReadKey();
+                    Console.WriteLine("Server stopped. Press 'Enter' to start.");
+                    Console.ReadKey();
+                    Cts = new CancellationTokenSource();
+                    server.Start(Cts);
+                }
             }
         }
     }

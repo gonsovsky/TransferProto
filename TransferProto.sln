@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Atoll.TransferService.Bundl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestServer", "TestServer\TestServer.csproj", "{06FC2B20-BE82-4BC8-B16C-263888347F02}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient", "TestClient\TestClient.csproj", "{A1619930-BBAA-43B6-B321-65C689287011}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestClient", "TestClient\TestClient.csproj", "{DEA26E73-BD97-4ACA-B02F-D96C4F21D30F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{06FC2B20-BE82-4BC8-B16C-263888347F02}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{06FC2B20-BE82-4BC8-B16C-263888347F02}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{06FC2B20-BE82-4BC8-B16C-263888347F02}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A1619930-BBAA-43B6-B321-65C689287011}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A1619930-BBAA-43B6-B321-65C689287011}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A1619930-BBAA-43B6-B321-65C689287011}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A1619930-BBAA-43B6-B321-65C689287011}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEA26E73-BD97-4ACA-B02F-D96C4F21D30F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEA26E73-BD97-4ACA-B02F-D96C4F21D30F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEA26E73-BD97-4ACA-B02F-D96C4F21D30F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEA26E73-BD97-4ACA-B02F-D96C4F21D30F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

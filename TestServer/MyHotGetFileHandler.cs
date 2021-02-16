@@ -47,11 +47,11 @@ namespace TestServer
             }
             catch (FileNotFoundException)
             {
-                return ctx.NotFound(string.Concat("File '", filePath, "' not found."));
+                return ctx.NotFound(string.Concat("File '", fileName, "' not found."));
             }
             catch (DirectoryNotFoundException)
             {
-                return ctx.NotFound(string.Concat("File '", filePath, "' not found."));
+                return ctx.NotFound(string.Concat("File '", fileName, "' not found."));
             }
             catch (Exception)
             {

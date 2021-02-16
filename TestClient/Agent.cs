@@ -109,7 +109,11 @@ namespace TestClient
             }
         }
 
+#if NETSTANDARD
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+#else
+        [MethodImpl(256)]
+#endif
         private void Send(AgentState state)
         {
             if (state.Send())
