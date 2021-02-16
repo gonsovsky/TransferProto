@@ -49,16 +49,16 @@ namespace Atoll.TransferService
         {
             if (base.DataSent(Frame.HaveToRead))
                 return true;
-            if (TransmitBytes == 0)
+            if (SendDataCount == 0)
                 return false;
             Frame.Count = BufferSize;
             this.Handler.Read(this);
             return true;
         }
 
-        public override byte[] TransmitData => Frame.Buffer;
+        public override byte[] SendData => Frame.Buffer;
 
-        public override int TransmitBytes
+        public override int SendDataCount
         {
             get => Frame.BytesRead;
             set => Frame.BytesRead = value;

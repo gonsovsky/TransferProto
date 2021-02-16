@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Text;
-
-namespace Atoll.TransferService.Server.Implementation
+﻿namespace Atoll.TransferService.Server.Implementation
 {
     public static class Routes
     {

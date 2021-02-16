@@ -9,4 +9,10 @@
     <ProjectReference Include="..\Atoll.TransferService.Bundle\Atoll.TransferService.Bundle.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Corallite">
+      <HintPath>..\Lib\netstandard2.0\Corallite.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

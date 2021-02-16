@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using Corallite.Buffers;
 
 // ReSharper disable once CheckNamespace
@@ -104,7 +105,7 @@ namespace Atoll.TransferService
         {
             if (HeadSent) return false;
             HeadSent = true;
-            using (var ms = new MemoryStream(TransmitData, true))
+            using (var ms = new MemoryStream(SendData, true))
             {
                 using (var writer = new BinaryWriter(ms))
                 {
@@ -114,13 +115,13 @@ namespace Atoll.TransferService
                     writer.Write(dataSize);
                 }
             }
-            TransmitBytes = 12 + ResponseMessage.Length;
+            SendDataCount = 12 + ResponseMessage.Length;
             return true;
         }
 
-        public virtual int TransmitBytes { get; set; }
+        public virtual int SendDataCount { get; set; }
 
-        public virtual byte[] TransmitData => Buffer;
+        public virtual byte[] SendData => Buffer;
 
         public HotContext UnknownRoute(string message = "")
         {
@@ -128,5 +129,11 @@ namespace Atoll.TransferService
             ResponseMessage = message;
             return this;
         }
+
+        public readonly ManualResetEvent SendDone =
+            new ManualResetEvent(false);
+
+        public readonly ManualResetEvent ReceiveDone =
+            new ManualResetEvent(false);
     }
 }

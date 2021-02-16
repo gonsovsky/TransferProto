@@ -29,6 +29,10 @@ namespace TestClient
                 }
             };
 
+            //var chore = new ChoreX();
+
+            //Console.ReadKey();
+
             agent.Cmd("upload",
                 new Contract()
                 {
@@ -52,6 +56,9 @@ namespace TestClient
                 new[] { "123-1.txt", "123-2.txt" }, "123.txt");
 
             agent.Cmd("list", new Contract() { Url = "/" });
+
+            agent.Cmd("list", new Contract() { Url = "/subfolder" });
+
 
             agent.Cmd("delete", new Contract(){Url = "abrakadabra"});
 

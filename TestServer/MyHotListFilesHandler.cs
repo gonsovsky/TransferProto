@@ -1,23 +1,41 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 using Atoll.TransferService;
 
 namespace TestServer
 {
-    public class MyHotListFilesHandler : IHotGetHandler
+    public class MyHotListFilesHandler : MyHotFileHandler, IHotGetHandler
     {
         private MemoryStream responseStream;
 
         public IHotGetHandlerContext Open(IHotGetHandlerContext ctx)
         {
+            var request = ctx.Request;
+
+            string baseDir;
+
+            try
+            {
+                baseDir = Encoding.UTF8.GetString(request.Data, 0, request.DataLength);
+                baseDir = AbsPath(baseDir);
+                if (Directory.Exists(baseDir) == false)
+                    throw new ApplicationException("Failed to change directory");
+            }
+            catch(Exception e)
+            {
+                return ctx.BadRequest(e.Message);
+            }
+
             this.responseStream = new MemoryStream();
             using (var wrap = new NonClosableStreamWrap(this.responseStream))
             using (var writer = new StreamWriter(wrap, Encoding.UTF8))
             {
-                foreach (var name in Directory.EnumerateFiles(AppDomain.CurrentDomain.BaseDirectory, "*"))
+                foreach (var name in Directory.EnumerateFiles(baseDir, "*", SearchOption.AllDirectories))
                 {
-                    writer.WriteLine(System.IO.Path.GetFileName(name));
+                    var rel = MyHotFileHandler.AbsoluteToRelativePath(name, baseDir);
+                    writer.WriteLine(rel);
                 }
                 writer.Flush();
             }

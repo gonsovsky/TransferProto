@@ -11,7 +11,6 @@ namespace TestServer
 
         private static void Main()
         {
-
             var routes = new HotServerRouteCollection()
                 .RouteGet<MyHotGetFileHandler>(Routes.Download)
                 .RouteGet<MyHotListFilesHandler>(Routes.List)
@@ -23,7 +22,7 @@ namespace TestServer
                     .UseRoutes(routes)
                     .UseConfig(new HotServerConfiguration
                     {
-                        Port = 3000, BufferSize = 512, Delay = 0, KeepAlive = 1
+                        Port = 3000, BufferSize = 256, Delay = 1000, KeepAlive =1
                     });
 
                 server.Start(Cts);

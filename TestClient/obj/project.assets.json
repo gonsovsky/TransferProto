@@ -207,6 +207,16 @@
         "build": {
           "build/netstandard2.0/NETStandard.Library.targets": {}
         }
+      },
+      "Atoll.TransferService.Bundle/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.0",
+        "compile": {
+          "bin/placeholder/Atoll.TransferService.Bundle.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Atoll.TransferService.Bundle.dll": {}
+        }
       }
     }
   },
@@ -680,10 +690,16 @@
         "netstandard.library.2.0.3.nupkg.sha512",
         "netstandard.library.nuspec"
       ]
+    },
+    "Atoll.TransferService.Bundle/1.0.0": {
+      "type": "project",
+      "path": "../Atoll.TransferService.Bundle/Atoll.TransferService.Bundle.csproj",
+      "msbuildProject": "../Atoll.TransferService.Bundle/Atoll.TransferService.Bundle.csproj"
     }
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.1": [
+      "Atoll.TransferService.Bundle >= 1.0.0",
       "Microsoft.NETCore.App >= 2.1.0"
     ]
   },
@@ -716,7 +732,11 @@
       },
       "frameworks": {
         "netcoreapp2.1": {
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\SoftConsult\\TransferProto\\Atoll.TransferService.Bundle\\Atoll.TransferService.Bundle.csproj": {
+              "projectPath": "C:\\SoftConsult\\TransferProto\\Atoll.TransferService.Bundle\\Atoll.TransferService.Bundle.csproj"
+            }
+          }
         }
       },
       "warningProperties": {

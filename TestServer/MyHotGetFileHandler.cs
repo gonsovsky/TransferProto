@@ -5,7 +5,7 @@ using Atoll.TransferService;
 
 namespace TestServer
 {
-    public class MyHotGetFileHandler : IHotGetHandler
+    public class MyHotGetFileHandler : MyHotFileHandler, IHotGetHandler
     {
         private FileStream fileStream;
 
@@ -26,7 +26,7 @@ namespace TestServer
 
             if (string.IsNullOrWhiteSpace(fileName)) return ctx.BadRequest("File name missing.");
 
-            var filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+            var filePath = AbsPath(fileName);
             try
             {
                 this.fileStream = new FileStream(

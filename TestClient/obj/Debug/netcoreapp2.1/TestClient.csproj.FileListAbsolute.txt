@@ -11,3 +11,6 @@ C:\SoftConsult\TransferProto\TestClient\obj\Debug\netcoreapp2.1\TestClient.Assem
 C:\SoftConsult\TransferProto\TestClient\obj\Debug\netcoreapp2.1\TestClient.csproj.CopyComplete
 C:\SoftConsult\TransferProto\TestClient\obj\Debug\netcoreapp2.1\TestClient.dll
 C:\SoftConsult\TransferProto\TestClient\obj\Debug\netcoreapp2.1\TestClient.pdb
+C:\SoftConsult\TransferProto\TestClient\obj\Debug\netcoreapp2.1\TestClient.csprojAssemblyReference.cache
+C:\SoftConsult\TransferProto\TestClient\bin\Debug\netcoreapp2.1\Atoll.TransferService.Bundle.dll
+C:\SoftConsult\TransferProto\TestClient\bin\Debug\netcoreapp2.1\Atoll.TransferService.Bundle.pdb

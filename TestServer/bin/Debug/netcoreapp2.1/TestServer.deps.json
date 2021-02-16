@@ -8,21 +8,19 @@
     ".NETCoreApp,Version=v2.1": {
       "TestServer/1.0.0": {
         "dependencies": {
-          "Atoll.TransferService.Bundle": "1.0.0"
+          "Atoll.TransferService.Bundle": "1.0.0",
+          "Corallite": "1.0.0.0"
         },
         "runtime": {
           "TestServer.dll": {}
         }
       },
       "Atoll.TransferService.Bundle/1.0.0": {
-        "dependencies": {
-          "Corallite": "1.0.0.0"
-        },
         "runtime": {
           "Atoll.TransferService.Bundle.dll": {}
         }
       },
-      "Corallite.Reference/1.0.0.0": {
+      "Corallite/1.0.0.0": {
         "runtime": {
           "Corallite.dll": {
             "assemblyVersion": "1.0.0.0",
@@ -43,7 +41,7 @@
       "serviceable": false,
       "sha512": ""
     },
-    "Corallite.Reference/1.0.0.0": {
+    "Corallite/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
