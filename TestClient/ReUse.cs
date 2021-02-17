@@ -23,5 +23,11 @@ namespace TestClient
             var p = Environment.TickCount <= LastTick + cfg.KeepAliveMsec ? Socket : null;
             return p;
         }
+
+        public static void Empty()
+        {
+            Socket = null;
+            LastTick = 0;
+        }
     }
 }

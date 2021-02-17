@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -28,6 +29,7 @@ namespace Atoll.TransferService
 
         public void Start(CancellationTokenSource token)
         {
+            config.Validate();
             externalToken = token ?? throw new ArgumentNullException();
 
             localToken = CancellationTokenSource.CreateLinkedTokenSource(externalToken.Token);
@@ -65,7 +67,7 @@ namespace Atoll.TransferService
             }
             catch (Exception e)
             {
-                Misc.Log(e.Message);
+                Misc.Log($"[Exception] [Start] {e.Message}");
             }
             finally
             {
@@ -122,7 +124,7 @@ namespace Atoll.TransferService
                 sock.NoDelay = true;
                 ctxAccept = new HotContext(sock, config);
                 Receive(ctxAccept);
-                Misc.Log($"Client accepted");
+                Misc.Log($"[info] Client accepted");
             }
             catch (Exception ex)
             {
@@ -140,7 +142,7 @@ namespace Atoll.TransferService
             ctx.SendDone.WaitOne();
             ctx.ReceiveDone.WaitOne();
             var sock = ctx.Socket;
-            Misc.Log($"{ctx.GetType().Name} finished with: {ctx.ResponseStatus}");
+            Misc.Log($"[info] {ctx.GetType().Name} finished with: {ctx.ResponseStatus}");
             ctx.Dispose();
             allDone.Set();
             if (config.IsKeepAlive)
@@ -150,9 +152,15 @@ namespace Atoll.TransferService
             }
         }
 
-        private void Abort(IDisposable ctx, Exception e)
+        private void Abort(HotContext ctx, Exception e, bool socketClose=false)
         {
-            Misc.Log($"Client aborted: {e.Message}");
+            if (e != null)
+                Misc.Log($"[info] Client aborted: {e.Message}");
+            if (config.IsKeepAlive && socketClose)
+            {
+                ctx.Socket.Shutdown(SocketShutdown.Both);
+                ctx.Socket.Close();
+            }
             ctx.Dispose();
             allDone.Set();
         }
@@ -168,10 +176,10 @@ namespace Atoll.TransferService
         {
             if (ctx is HotPutHandlerContext ctxUp) //file uploading branch. (Head allready received)
                 ctxUp.Socket.BeginReceive(ctxUp.Frame.Buffer, 0,
-                    ctxUp.Frame.BufferSize, 0, ReceiveCallBack, ctxUp);
+                    config.RecvSize, 0, ReceiveCallBack, ctxUp);
             else
                 ctx.Socket.BeginReceive(ctx.Buffer, ctx.BufferOffset, //receiving head of any request
-                    ctx.BufferSize - ctx.BufferOffset, 0, ReceiveCallBack, ctx);
+                    config.RecvSize, 0, ReceiveCallBack, ctx);
             return;
         }
 
@@ -233,13 +241,21 @@ namespace Atoll.TransferService
                                 ctxUp.Handler.Open(ctxUp);
                             }
                             CheckAndSend(ctxUp);
-                            if (ctxUp.DataReceived(bytesRead - ctxUp.Frame.BufferOffset) == false) //read rest of bytes from HotContext
+                            if (ctxUp.ResponseStatus == HttpStatusCode.OK)
+                            {
+                                var rest = ctxAccept.TotalReceived - ctxUp.Frame.BufferOffset;
+                                if (rest != 0 && ctxUp.DataReceived(rest) == false) //read rest of bytes from HotContext
+                                {
+                                    ctxUp.ReceiveDone.Set();
+                                    Accomplish(ctxUp);
+                                    return;
+                                }
+                                Receive(ctxUp);
+                            }
+                            else
                             {
                                 ctxUp.ReceiveDone.Set();
-                                Accomplish(ctxUp);
-                                return;
                             }
-                            Receive(ctxUp);
                             break;
                         default:
                             ctxAccept.ReceiveDone.Set();
@@ -250,15 +266,25 @@ namespace Atoll.TransferService
                 }
                 else
                 {
+                    if (ctxAccept.ResponseStatus == HttpStatusCode.RequestUriTooLong)
+                    {
+                        ctxAccept.BufferOffset = 0;
+                        ctxAccept.ReceiveDone.Set();
+                        CheckAndSend(ctxAccept);
+                        ctxAccept.SendDone.WaitOne();
+                        Abort(ctxAccept, null,true);
+                        return;
+                    }
                     Receive(ctxAccept);
                 }
             }
             catch (Exception ex)
             {
-                ctxGet?.Dispose();
-                ctxUp?.Dispose();
-                allDone.Set();
-                Misc.Log(ex.Message);
+                if (ctxGet!=null)
+                    Abort(ctxGet,ex,true);
+                if (ctxUp != null)
+                    Abort(ctxUp, ex, true);
+                Misc.Log($"[exception] [ReceiveCallBack] {ex.Message}");
             }
             finally
             {
@@ -268,7 +294,6 @@ namespace Atoll.TransferService
         #endregion
 
         #region Send
-
         private bool CheckAndSend(HotContext ctx)
         {
             var ok = ctx.DataSent();
@@ -299,10 +324,10 @@ namespace Atoll.TransferService
                     return;
                 }
             }
-            if (config.Delay == 0)
+            if (config.SendDelay == 0)
                 Send(ctx, true);
             else
-                Misc.Delay(config.Delay).ContinueWith(a => Send(ctx, true));
+                Misc.Delay(config.SendDelay).ContinueWith(a => Send(ctx, true));
         }
 
         private void SendCallback(IAsyncResult ar)

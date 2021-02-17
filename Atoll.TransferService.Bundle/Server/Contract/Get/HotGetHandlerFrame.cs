@@ -56,7 +56,7 @@ namespace Atoll.TransferService
         public HotGetHandlerFrame(HotGetHandlerContext ctx)
         {
             this.ctx = ctx;
-            this.Buffer = UniArrayPool<byte>.Shared.Rent(ctx.Config.BufferSize);
+            this.Buffer = UniArrayPool<byte>.Shared.Rent(ctx.Config.MinBufferSize);
         }
 
         public void Dispose()

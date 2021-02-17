@@ -10,4 +10,3 @@ C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.AssemblyInfo.
 C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.csproj.CopyComplete
 C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.exe
 C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.pdb
-C:\SoftConsult\TransferProto\TestClient\obj\Debug\net40\TestClient.csprojAssemblyReference.cache

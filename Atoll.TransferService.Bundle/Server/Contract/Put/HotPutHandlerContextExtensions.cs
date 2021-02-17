@@ -18,15 +18,19 @@ namespace Atoll.TransferService
         public static IHotPutHandlerContext WriteToStream(this IHotPutHandlerContext ctx, Stream stream) 
         {
             var frame = ctx.Frame;
-            
-            stream.Seek(frame.ContentOffset + frame.TotalWrite, SeekOrigin.Begin);
-            var len = (int)Math.Min(frame.Count, frame.ContentLength - frame.TotalWrite);
-            stream.Write(frame.Buffer, frame.BufferOffset, len);
-            frame.BytesWrite = len;
-            frame.TotalWrite += len;
-            return ctx.Ok();
+
+                stream.Seek(frame.ContentOffset + frame.TotalWrite, SeekOrigin.Begin);
+                var len = (int)Math.Min(frame.Count, frame.ContentLength - frame.TotalWrite);
+                if (len < 0)
+                {
+
+                }
+                stream.Write(frame.Buffer, frame.BufferOffset, len);
+
+                frame.BytesWrite = len;
+                frame.TotalWrite += len;
+                return ctx.Ok();
         }
 
     }
-
 }

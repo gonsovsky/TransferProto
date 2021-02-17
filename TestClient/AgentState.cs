@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Corallite.Buffers;
 
 namespace TestClient
@@ -56,6 +57,7 @@ namespace TestClient
 
         public bool DataReceived(int len)
         {
+
             BytesRecv += len;
             var headDelta = 0;
             if (!HeadRecv)
@@ -65,6 +67,10 @@ namespace TestClient
                 if (BufferLen < RecvPacket.MinSize)
                     return false;
                 RecvPacket = RecvPacket.FromByteArray(Buffer, len);
+                if (BytesRecv < RecvPacket.MySize)
+                {
+
+                }
                 headDelta = RecvPacket.MySize;
             }
             if (RecvStream == null && RecvPacket.StatusCode == HttpStatusCode.OK)
@@ -131,8 +137,15 @@ namespace TestClient
             Buffer = null;
             if (!KeepAlive)
             {
-                this.Socket?.Shutdown(SocketShutdown.Both);
-                this.Socket?.Close();
+                try
+                {
+                    this.Socket?.Shutdown(SocketShutdown.Both);
+                    this.Socket?.Close();
+                }
+                catch (Exception e)
+                {
+                    //nothing
+                }
                 this.Socket = null;
             }
         }
@@ -158,7 +171,7 @@ namespace TestClient
                 RecvStream.Position = 0;
                 using (StreamReader sr = new StreamReader(RecvStream))
                 {
-                    return sr.ReadToEnd();
+                    return sr.ReadToEnd().Replace("\r\n",", ");
                 }
             }
         }

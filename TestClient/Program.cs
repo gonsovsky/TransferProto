@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Linq;
+using System.Threading;
 
 namespace TestClient
 {
@@ -9,7 +11,7 @@ namespace TestClient
         {
             var fs = new Fs(Helper.AssemblyDirectory);
             var agent = new Agent(new Config()
-                { BufferSize = 512, KeepAlive = 5, Net = "localhost", Port = 3000}, 
+                { BufferSize = 1024, KeepAlive = 0, Net = "localhost", Port = 3000}, 
                 fs)
             {
                 OnRequest = (party, state) =>
@@ -29,7 +31,7 @@ namespace TestClient
                 }
             };
 
-            
+            //new ChoreX();
 
             while (true)
             {
@@ -48,9 +50,11 @@ namespace TestClient
 
                 agent.Cmd("list", new Contract() {Url = "/subfolder"});
 
-                agent.Cmd("download", new Contract() {Url = "/subfolder/subfile.txt"});
+                agent.Cmd("download", new Contract() { Url = "/subfolder/subfile.txt" });
 
-                agent.Cmd("delete", new Contract() {Url = "abrakadabra"});
+                agent.Cmd("delete", new Contract() { Url = "abrakadabra" });
+
+                agent.Cmd("download", new Contract() { Url = string.Concat(Enumerable.Repeat("a", 120)) + ".txt" });
 
                 agent.Cmd("upload",
                     new Contract()
@@ -62,11 +66,10 @@ namespace TestClient
                     ,
                     new FileStream("456.txt", FileMode.Open, FileAccess.Read, FileShare.Read)
                 );
-
             }
 
-            Console.WriteLine("enter to close");
-            Console.ReadLine();
+            Console.ReadKey();
+
         }
     }
 }

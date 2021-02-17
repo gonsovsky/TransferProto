@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace TestClient
 {
@@ -42,40 +43,56 @@ namespace TestClient
 
         public object Cmd<T>(string route, T contract, Stream data=null) where T: Contract
         {
-            ConnectDone.Reset();
-            SendDone.Reset();
-            ReceiveDone.Reset();
-            var state = new AgentState(cfg, route, contract, data, fs);
             try
             {
-                Socket client;
-                if (!cfg.IsKeepAlive)
-                    client = NewSocket(state);
-                else
+                ConnectDone.Reset();
+                SendDone.Reset();
+                ReceiveDone.Reset();
+                var state = new AgentState(cfg, route, contract, data, fs);
+                try
                 {
-                    client = ReUse.Get();
-                    if (client == null)
-                    {
+                    Socket client;
+                    if (!cfg.IsKeepAlive)
                         client = NewSocket(state);
-                        ReUse.Put(client);
+                    else
+                    {
+                        client = ReUse.Get();
+                        if (client == null)
+                        {
+                            client = NewSocket(state);
+                            ReUse.Put(client);
+                        }
                     }
+
+                    state.Socket = client;
+                    Send(state);
+                    SendDone.WaitOne();
+                    Receive(state);
+                    ReceiveDone.WaitOne();
+                    if (state.RecvPacket.StatusCode == HttpStatusCode.OK)
+                    {
+                        return Complete(state);
+                    }
+                    else
+                    {
+                        throw new ApplicationException($"{state.RecvPacket.StatusCode}, {state.RecvPacket.Body}");
+                    }
+
                 }
-                state.Socket = client;
-                Send(state);
-                SendDone.WaitOne();
-                Receive(state);
-                ReceiveDone.WaitOne();
-                if (state.RecvPacket.StatusCode == HttpStatusCode.OK)
-                    return Complete(state);
-                else
+                catch (SocketException e)
                 {
-                    throw new ApplicationException($"{state.RecvPacket.StatusCode}, {state.RecvPacket.Body}");
+                    Abort(state, e);
+                    return null;
+                }
+                catch (Exception e)
+                {
+                    Abort(state, e, false);
+                    return null;
                 }
             }
-            catch (Exception e)
+            finally
             {
-                Abort(state, e);
-                return null;
+                Thread.Sleep(700);
             }
         }
 
@@ -149,6 +166,7 @@ namespace TestClient
             {
                 state.Socket.BeginReceive(state.Buffer, 0, state.BufferSize, 0,
                     ReceiveCallback, state);
+             
             }
             catch (Exception e)
             {
@@ -202,8 +220,22 @@ namespace TestClient
             }
         }
 
-        public void Abort(AgentState state, Exception e)
+        public void Abort(AgentState state, Exception e, bool socketException=true)
         {
+            if (cfg.IsKeepAlive && socketException)
+            {
+                ReUse.Empty();
+                try
+                {
+                    state.Socket?.Shutdown(SocketShutdown.Both);
+                    state.Socket?.Close();
+                }
+                catch (Exception)
+                {
+                    //nothing
+                }
+                state.Socket = null;
+            }
             state?.Dispose();
             ConnectDone.Set();
             SendDone.Set();

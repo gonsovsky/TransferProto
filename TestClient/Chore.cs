@@ -24,6 +24,8 @@ namespace TestClient
             var settingsCustom = new Corallite.Chores.ChoreListReadOnlySettings("hot", 1, overSettings);
 
             var service = new ChoreService(settingsDefault, settingsCustom, 1, profiler);
+            var chore = new HotChore();
+            
             service.Start();
         }
 

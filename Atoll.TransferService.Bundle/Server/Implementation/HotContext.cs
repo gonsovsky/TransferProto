@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -38,6 +39,8 @@ namespace Atoll.TransferService
 
         public int BufferSize;
 
+        public int TotalReceived;
+
         protected MemoryStream BufferStream;
 
         protected BinaryReader BufferReader;
@@ -50,8 +53,8 @@ namespace Atoll.TransferService
         {
             this.Socket = socket;
             this.Config = config;
-            this.Buffer = UniArrayPool<byte>.Shared.Rent(config.BufferSize);
-            this.BufferSize = config.BufferSize;
+            this.Buffer = UniArrayPool<byte>.Shared.Rent(config.MinBufferSize);
+            this.BufferSize = config.MinBufferSize;
         }
 
         public virtual void Dispose()
@@ -65,39 +68,72 @@ namespace Atoll.TransferService
         public virtual bool DataReceived(int cnt)
         {
             BufferOffset += cnt;
-            if (this.Accept != null)
-                return true;
-            if (BufferStream == null)
-            {
-                BufferStream = new MemoryStream(Buffer);
-                BufferReader = new BinaryReader(BufferStream);
-            }
-
+            TotalReceived += cnt;
             try
             {
-                Accept = new HotAccept {RouteLen = BufferReader.ReadInt32()};
-                if (BufferStream.Length < Accept.RouteLen + 4)
+                if (this.Accept != null)
+                    return true;
+                if (BufferStream == null)
+                {
+                    BufferStream = new MemoryStream(Buffer);
+                    BufferReader = new BinaryReader(BufferStream);
+                }
+                try
+                {
+                    BufferStream.Seek(0, SeekOrigin.Begin);
+                    var routeLen = BufferReader.ReadInt32();
+                    if (BufferOffset >= routeLen + 4)
+                    {
+                        var routeData = BufferReader.ReadBytes(routeLen);
+                        var bodyLen = BufferReader.ReadInt32();
+                        if (BufferOffset >= routeLen + bodyLen + 8 + 16)
+                        {
+                            Accept = new HotAccept() {RouteLen = routeLen, RouteData = routeData, BodyLen = bodyLen};
+                            Accept.BodyData = BufferReader.ReadBytes(Accept.BodyLen);
+                            Accept.ContentOffset = BufferReader.ReadInt64();
+                            Accept.ContentLength = (int) BufferReader.ReadInt64();
+                            Accept.Route = Accept.RouteData.MakeString(Accept.RouteLen);
+                            BufferOffset = 24 + Accept.BodyLen + Accept.RouteLen;
+                            if (BufferOffset > Config.MaxBufferSize)
+                            {
+                                this.TooLarge("");
+                                return false;
+                            }
+                            return true;
+                        }
+                    }
                     return false;
-                Accept.RouteData = BufferReader.ReadBytes(Accept.RouteLen);
-                Accept.BodyLen = BufferReader.ReadInt32();
-                if (BufferStream.Length < Accept.RouteLen + Accept.BodyLen + 8)
+                }
+                catch (EndOfStreamException) //минимум данных пока не добрался
+                {
                     return false;
-                Accept.BodyData = BufferReader.ReadBytes(Accept.BodyLen);
-                Accept.ContentOffset = BufferReader.ReadInt64();
-                Accept.ContentLength = (int)BufferReader.ReadInt64();
-                Accept.Route = Accept.RouteData.MakeString(Accept.RouteLen);
-
-                var total = 26 + Accept.BodyLen + Accept.RouteLen;
-
-                BufferOffset = total;
-
-                return true;
+                }
             }
-            catch (EndOfStreamException) //минимум данных пока не добрался
+            finally
             {
-                return false;
+                if (BufferOffset >= BufferSize-Config.RecvSize)
+                {
+                    //TODO: Оптимизировать, смотреть реальный размер буфера
+                    var newSize = LimitBufferSize(BufferSize + Config.RecvSize+1);
+                    if (newSize <= BufferOffset + Config.RecvSize)
+                    {
+                        this.TooLarge("");
+                    }
+                    else
+                    {
+                        var newBuf = UniArrayPool<byte>.Shared.Rent(newSize);
+                        Array.Copy(Buffer, newBuf, BufferSize);
+                        UniArrayPool<byte>.Shared.Return(Buffer);
+                        Buffer = newBuf;
+                        BufferSize = newSize;
+                        BufferStream = new MemoryStream(Buffer);
+                        BufferReader = new BinaryReader(BufferStream);
+                    }
+                }
             }
         }
+
+        protected int LimitBufferSize(int want) => Math.Min(Config.MaxBufferSize, want);
 
         public bool HeadSent;
 
@@ -105,6 +141,18 @@ namespace Atoll.TransferService
         {
             if (HeadSent) return false;
             HeadSent = true;
+            SendDataCount = 12 + ResponseMessage.Length;
+            if (SendData.Length <= SendDataCount)
+            {
+                var newSize = LimitBufferSize(SendDataCount * 2);
+                if (newSize <= SendDataCount)
+                {
+                    this.TooLarge("");
+                    return false;
+                }
+                UniArrayPool<byte>.Shared.Return(SendData);
+                SendData = UniArrayPool<byte>.Shared.Rent(newSize);
+            }
             using (var ms = new MemoryStream(SendData, true))
             {
                 using (var writer = new BinaryWriter(ms))
@@ -115,17 +163,27 @@ namespace Atoll.TransferService
                     writer.Write(dataSize);
                 }
             }
-            SendDataCount = 12 + ResponseMessage.Length;
             return true;
         }
 
         public virtual int SendDataCount { get; set; }
 
-        public virtual byte[] SendData => Buffer;
+        public virtual byte[] SendData
+        {
+            get => Buffer;
+            set => Buffer = value;
+        }
 
         public HotContext UnknownRoute(string message = "")
         {
             ResponseStatus = HttpStatusCode.MethodNotAllowed;
+            ResponseMessage = message;
+            return this;
+        }
+
+        public HotContext TooLarge(string message = "")
+        {
+            ResponseStatus = HttpStatusCode.RequestUriTooLong;
             ResponseMessage = message;
             return this;
         }
